@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, useEffect, useState } from "react";
+import { ChangeEvent, DragEvent, useEffect, useState, useCallback } from "react";
 import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github } from "lucide-react";
 
 type ScanMode = "depth" | "lidar" | "wireframe" | "mesh" | "scanner";
@@ -60,41 +60,8 @@ function App() {
       .catch(() => setHealth("offline"));
   }, []);
 
-  function acceptFile(nextFile: File) {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(nextFile.type)) {
-      setError("Upload a JPG, PNG, or WEBP image.");
-      return;
-    }
-    setFile(nextFile);
-    setSourceUrl((oldUrl) => {
-      if (oldUrl) URL.revokeObjectURL(oldUrl);
-      return URL.createObjectURL(nextFile);
-    });
-    setError("");
-  }
-
-  function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-    const nextFile = event.dataTransfer.files[0];
-    if (nextFile) {
-      acceptFile(nextFile);
-    }
-  }
-
-  function handleInput(event: ChangeEvent<HTMLInputElement>) {
-    const nextFile = event.target.files?.[0];
-    if (nextFile) {
-      acceptFile(nextFile);
-    }
-  }
-
-  function updateControl(key: ControlKey, value: string) {
-    setControls((current) => ({ ...current, [key]: Number(value) }));
-  }
-
-  async function runScan() {
-    if (!file) return;
+  const runScan = useCallback(async () => {
+    if (!file || health !== "ready") return;
 
     setIsProcessing(true);
     setError("");
@@ -131,6 +98,50 @@ function App() {
     } finally {
       setIsProcessing(false);
     }
+  }, [file, mode, controls, health]);
+
+  // Auto-scan on changes with a 500ms debounce
+  useEffect(() => {
+    if (!file || health !== "ready") return;
+    
+    const timeoutId = setTimeout(() => {
+      runScan();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [runScan, file, health]);
+
+  function acceptFile(nextFile: File) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(nextFile.type)) {
+      setError("Upload a JPG, PNG, or WEBP image.");
+      return;
+    }
+    setFile(nextFile);
+    setSourceUrl((oldUrl) => {
+      if (oldUrl) URL.revokeObjectURL(oldUrl);
+      return URL.createObjectURL(nextFile);
+    });
+    setError("");
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    const nextFile = event.dataTransfer.files[0];
+    if (nextFile) {
+      acceptFile(nextFile);
+    }
+  }
+
+  function handleInput(event: ChangeEvent<HTMLInputElement>) {
+    const nextFile = event.target.files?.[0];
+    if (nextFile) {
+      acceptFile(nextFile);
+    }
+  }
+
+  function updateControl(key: ControlKey, value: string) {
+    setControls((current) => ({ ...current, [key]: Number(value) }));
   }
 
   function saveResult() {
@@ -156,7 +167,7 @@ function App() {
               href="https://github.com/forex911/NeuraDepth" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-btn neu-raised text-black transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-btn neu-raised text-black transition-colors hover:text-[#F62440]"
             >
               <Github size={16} />
               <span className="text-xs font-semibold tracking-wide">Star on GitHub</span>
@@ -177,10 +188,18 @@ function App() {
           {/* Controls Sidebar */}
           <div className="lg:col-span-1 space-y-8">
             <article className="neu-raised p-6 rounded-3xl">
-              <h2 className="text-lg font-semibold text-black mb-6 tracking-tight flex items-center gap-2">
-                <Settings2 size={20} />
-                Parameters
-              </h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-black tracking-tight flex items-center gap-2">
+                  <Settings2 size={20} />
+                  Parameters
+                </h2>
+                {isProcessing && (
+                  <span className="flex items-center gap-2 text-xs font-medium text-[#F62440] animate-pulse">
+                    <Activity size={14} className="animate-spin" />
+                    Syncing
+                  </span>
+                )}
+              </div>
 
               <div className="space-y-6">
                 <div>
@@ -224,19 +243,7 @@ function App() {
                     </div>
                   </div>
                 ))}
-
-                <button
-                  onClick={runScan}
-                  disabled={!file || isProcessing || health !== "ready"}
-                  className="neu-btn neu-focus w-full py-4 px-6 rounded-xl text-sm font-medium text-white bg-gradient-to-br from-[#F62440] to-[#D91C35] shadow-lg mt-8 flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {isProcessing ? (
-                    <Activity size={18} className="animate-spin text-white" />
-                  ) : (
-                    <Scan size={18} className="text-white" />
-                  )}
-                  {isProcessing ? "Scanning..." : "Generate Scan"}
-                </button>
+                
                 {error && <p className="text-xs text-white mt-2 text-center bg-[#F62440]/80 p-2 rounded-lg">{error}</p>}
               </div>
             </article>
@@ -284,7 +291,7 @@ function App() {
                     <p className="text-sm font-medium mb-1 text-black">Drop image here or click to upload</p>
                     <p className="text-xs text-black/70">PNG, JPG, WEBP</p>
                   </div>
-                ) : isProcessing ? (
+                ) : isProcessing && !resultUrl ? (
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 rounded-full border-4 border-[#FFE5BF] border-t-[#F62440] animate-spin"></div>
                     <span className="text-sm font-medium animate-pulse text-black/70">Generating Map...</span>
