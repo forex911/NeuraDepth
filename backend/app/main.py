@@ -1,34 +1,52 @@
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+import asyncio
+import logging
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 from .processor import ProcessingParams, process_image
 
+# Configure basic logging
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
-    title="DepthScan API",
-    description="Local classical computer vision depth scan generator.",
-    version="1.0.0",
+    title="DepthForge API",
+    description="Professional-grade local AI 3D depth generator.",
+    version="2.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:4173",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Websocket Connections
+active_connections = set()
+
+@app.websocket("/ws/progress")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    active_connections.add(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except:
+        active_connections.remove(websocket)
+
+async def broadcast_progress(message: str):
+    """Send progress updates to the frontend via WebSockets"""
+    for connection in list(active_connections):
+        try:
+            await connection.send_text(message)
+        except:
+            active_connections.remove(connection)
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ready"}
-
 
 @app.post("/scan")
 async def scan(
@@ -59,8 +77,19 @@ async def scan(
     )
 
     try:
-        png = process_image(raw, params)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        # Notify the UI that processing has started
+        await broadcast_progress("Initializing Depth Engine (PyTorch FP16)...")
+        
+        # Offload the heavy AI computation to a thread to keep the server responsive
+        result_bytes, media_type, ext = await asyncio.to_thread(process_image, raw, params)
+        
+        await broadcast_progress("Depth scan generated successfully.")
+    except Exception as exc:
+        await broadcast_progress(f"Generation Error: {str(exc)}")
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    return Response(content=png, media_type="image/png")
+    return Response(
+        content=result_bytes, 
+        media_type=media_type,
+        headers={"X-File-Extension": ext}
+    )

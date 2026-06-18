@@ -1,8 +1,8 @@
-# NeuraDepth
+# DepthForge
 
-**NeuraDepth** is an advanced, locally-hosted Neuromorphic UI tool that generates simulated depth maps, LiDAR point clouds, wireframes, and meshes directly from standard 2D input images using computer vision.
+**DepthForge** is an advanced, locally-hosted Neuromorphic UI tool that generates simulated depth maps, LiDAR point clouds, wireframes, and meshes directly from standard 2D input images using computer vision.
 
-Built with a lightning-fast React/Vite frontend and a powerful FastAPI Python backend, NeuraDepth allows users to instantly visualize and compare spatial depth approximations of any image, all processed locally without needing cloud APIs.
+Built with a lightning-fast React/Vite frontend and a powerful FastAPI Python backend, DepthForge allows users to instantly visualize and compare spatial depth approximations of any image, all processed locally without needing cloud APIs.
 
 ---
 
@@ -16,7 +16,7 @@ Built with a lightning-fast React/Vite frontend and a powerful FastAPI Python ba
 
 ## Processing Modes
 
-NeuraDepth comes equipped with 5 distinct computer vision generation modes:
+DepthForge comes equipped with 5 distinct computer vision generation modes:
 
 1.  **Depth Map**: Generates a classic grayscale z-buffer estimation using luminance, contrast mapping, and edge detection.
 2.  **LiDAR**: Simulates a high-density point cloud laser scan, projecting the depth map into a colored heatmap scatter plot.
@@ -46,7 +46,7 @@ Fine-tune your depth generation with 6 precise sliders:
 
 ## Getting Started
 
-To run NeuraDepth locally, you will need to start both the backend server and the frontend development server.
+To run DepthForge locally, you will need to start both the backend server and the frontend development server.
 
 ### Prerequisites
 *   Node.js (v16+)
@@ -86,14 +86,14 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173` (or the port provided by Vite) in your browser to start using NeuraDepth!
+Visit `http://localhost:5173` (or the port provided by Vite) in your browser to start using DepthForge!
 
 ---
 
 ## Project Structure
 
 ```text
-NeuraDepth/
+DepthForge/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py         # FastAPI endpoints and CORS setup

@@ -1,27 +1,13 @@
-from dataclasses import dataclass
 import cv2
 import numpy as np
 from PIL import Image
+from dataclasses import dataclass
+import logging
+from .services.depth_engine import DepthEngine
+from .services.export_service import ExportService
 
-try:
-    from transformers import pipeline
-except ImportError:
-    pipeline = None
-
-VALID_MODES = {"depth", "lidar", "wireframe", "mesh", "scanner"}
-
-# Global model instance
-_depth_estimator = None
-
-def get_depth_estimator():
-    global _depth_estimator
-    if _depth_estimator is None:
-        if pipeline is None:
-            raise RuntimeError("transformers library is not installed.")
-        # Load the state-of-the-art Depth Anything V2 model
-        _depth_estimator = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Small-hf")
-    return _depth_estimator
-
+logger = logging.getLogger(__name__)
+VALID_MODES = {"depth", "lidar", "wireframe", "mesh", "scanner", "export_16bit", "photogrammetry", "topographic", "export_obj", "export_ply"}
 
 @dataclass(frozen=True)
 class ProcessingParams:
@@ -33,29 +19,81 @@ class ProcessingParams:
     smoothing: float
     point_density: float
 
-
-def process_image(raw: bytes, params: ProcessingParams) -> bytes:
+def process_image(raw: bytes, params: ProcessingParams) -> tuple[bytes, str, str]:
     mode = params.mode if params.mode in VALID_MODES else "depth"
     image = _decode_image(raw)
     
-    depth, edges, gradients = _estimate_depth(image, params)
+    # 1. Classical Edge & Gradient Extraction
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.4, tileGridSize=(8, 8)).apply(gray)
+    
+    sensitivity = _unit(params.edge_sensitivity)
+    low = int(18 + (1.0 - sensitivity) * 92)
+    high = int(low + 70 + (1.0 - sensitivity) * 82)
+    edges = cv2.Canny(clahe, low, high)
 
-    if mode == "depth":
+    sobel_x = cv2.Sobel(clahe, cv2.CV_32F, 1, 0, ksize=3)
+    sobel_y = cv2.Sobel(clahe, cv2.CV_32F, 0, 1, ksize=3)
+    gradient = _normalize(cv2.magnitude(sobel_x, sobel_y))
+
+    # 2. Depth Engine Inference (Stage 2)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    pil_img = Image.fromarray(image_rgb)
+    
+    engine = DepthEngine()
+    raw_depth = engine.generate_depth(pil_img)
+    
+    # 3. Refinement (Stage 3)
+    refined_depth = engine.refine_depth(raw_depth, image)
+
+    # 4. Detail Recovery (Stage 5)
+    detailed_depth = engine.recover_details(refined_depth, image, strength=0.25)
+
+    # 5. Smoothing and Contrast
+    contrast = _unit(params.depth_contrast)
+    smooth = _unit(params.smoothing)
+
+    depth = detailed_depth
+    if smooth > 0.03:
+        blur_kernel = int(3 + smooth * 10)
+        if blur_kernel % 2 == 0:
+            blur_kernel += 1
+        depth = cv2.GaussianBlur(depth, (blur_kernel, blur_kernel), 0)
+
+    depth = np.clip((depth - 0.5) * (0.75 + contrast * 1.9) + 0.5, 0.0, 1.0)
+    depth = depth.astype(np.float32)
+
+    # 6. Render mode
+    if mode == "export_16bit":
+        # Stage 7: Precision Depth Storage
+        depth_16bit = (depth * 65535.0).astype(np.uint16)
+        success, encoded = cv2.imencode(".png", depth_16bit)
+        if not success:
+            raise ValueError("Could not encode 16-bit depth.")
+        return encoded.tobytes(), "image/png", "png"
+    elif mode == "export_obj":
+        return ExportService.generate_obj(depth), "text/plain", "obj"
+    elif mode == "export_ply":
+        return ExportService.generate_ply(depth, image), "application/octet-stream", "ply"
+    elif mode == "depth":
         output = _depth_map(depth)
     elif mode == "lidar":
         output = _lidar_scan(depth, edges, params)
     elif mode == "wireframe":
         output = _wireframe(depth, edges, image, params)
     elif mode == "mesh":
-        output = _mesh_scan(depth, gradients, params)
+        output = _mesh_scan(depth, gradients=gradient, params=params)
+    elif mode == "photogrammetry":
+        output = _photogrammetry_scan(depth, gradient, params)
+    elif mode == "topographic":
+        output = _topographic_scan(depth, params)
     else:
-        output = _scanner_visualization(depth, edges, gradients, params)
+        output = _scanner_visualization(depth, edges, gradients=gradient, params=params)
 
     success, encoded = cv2.imencode(".png", output)
     if not success:
         raise ValueError("Could not encode generated scan.")
-    return encoded.tobytes()
-
+    return encoded.tobytes(), "image/png", "png"
 
 def _decode_image(raw: bytes) -> np.ndarray:
     buffer = np.frombuffer(raw, dtype=np.uint8)
@@ -64,73 +102,10 @@ def _decode_image(raw: bytes) -> np.ndarray:
         raise ValueError("Could not read the uploaded image.")
     return image
 
-
-def _estimate_depth(image: np.ndarray, params: ProcessingParams) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(clipLimit=2.4, tileGridSize=(8, 8)).apply(gray)
-
-    # 1. Classical Edge & Gradient extraction for rendering styles
-    sensitivity = _unit(params.edge_sensitivity)
-    low = int(18 + (1.0 - sensitivity) * 92)
-    high = int(low + 70 + (1.0 - sensitivity) * 82)
-    edges = cv2.Canny(clahe, low, high)
-
-    sobel_x = cv2.Sobel(clahe, cv2.CV_32F, 1, 0, ksize=3)
-    sobel_y = cv2.Sobel(clahe, cv2.CV_32F, 0, 1, ksize=3)
-    gradient = cv2.magnitude(sobel_x, sobel_y)
-    gradient = _normalize(gradient)
-
-    # 2. True AI Monocular Depth Estimation
-    estimator = get_depth_estimator()
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    pil_img = Image.fromarray(image_rgb)
-    
-    # Inference
-    result = estimator(pil_img)
-    
-    # 'depth' is typically a PIL Image containing the depth map
-    ai_depth_img = result["depth"]
-    ai_depth = np.array(ai_depth_img).astype(np.float32)
-    
-    # Resize AI depth to original resolution
-    h, w = gray.shape
-    ai_depth = cv2.resize(ai_depth, (w, h), interpolation=cv2.INTER_LINEAR)
-    ai_depth = _normalize(ai_depth)
-
-    # 3. Hybrid Approach: Guided Filter / Edge-Aware Sharpening
-    # Use the crisp original image to snap the blurry AI edges to exact pixel boundaries
-    radius = 8
-    eps = 0.01
-    try:
-        refined_depth = cv2.ximgproc.createGuidedFilter(guide=clahe, radius=radius, eps=eps).filter(ai_depth)
-    except AttributeError:
-        # Fallback if opencv-contrib is not available
-        refined_depth = cv2.bilateralFilter(ai_depth, d=9, sigmaColor=0.1, sigmaSpace=15.0)
-    
-    refined_depth = _normalize(refined_depth)
-
-    # 4. Apply UI Control Parameters
-    contrast = _unit(params.depth_contrast)
-    smooth = _unit(params.smoothing)
-
-    depth = refined_depth
-    
-    if smooth > 0.03:
-        blur_kernel = int(3 + smooth * 10)
-        if blur_kernel % 2 == 0:
-            blur_kernel += 1
-        depth = cv2.GaussianBlur(depth, (blur_kernel, blur_kernel), 0)
-
-    # Contrast adjustment
-    depth = np.clip((depth - 0.5) * (0.75 + contrast * 1.9) + 0.5, 0.0, 1.0)
-    
-    return depth.astype(np.float32), edges, gradient
-
-
+# ... Visualization functions ...
 def _depth_map(depth: np.ndarray) -> np.ndarray:
     depth_u8 = (depth * 255).astype(np.uint8)
     return cv2.cvtColor(depth_u8, cv2.COLOR_GRAY2BGR)
-
 
 def _lidar_scan(depth: np.ndarray, edges: np.ndarray, params: ProcessingParams) -> np.ndarray:
     height, width = depth.shape
@@ -159,7 +134,6 @@ def _lidar_scan(depth: np.ndarray, edges: np.ndarray, params: ProcessingParams) 
 
     return _add_noise(canvas, params.noise_level)
 
-
 def _wireframe(depth: np.ndarray, edges: np.ndarray, image: np.ndarray, params: ProcessingParams) -> np.ndarray:
     height, width = depth.shape
     canvas = np.zeros((height, width, 3), dtype=np.uint8)
@@ -176,7 +150,6 @@ def _wireframe(depth: np.ndarray, edges: np.ndarray, image: np.ndarray, params: 
     canvas[edge_glow > 0] = (235, 247, 255)
     shaded = cv2.cvtColor(cv2.convertScaleAbs(depth * 72), cv2.COLOR_GRAY2BGR)
     return cv2.addWeighted(shaded, 0.45, canvas, 1.0, 0)
-
 
 def _mesh_scan(depth: np.ndarray, gradients: np.ndarray, params: ProcessingParams) -> np.ndarray:
     height, width = depth.shape
@@ -208,13 +181,7 @@ def _mesh_scan(depth: np.ndarray, gradients: np.ndarray, params: ProcessingParam
 
     return _add_noise(canvas, params.noise_level * 0.55)
 
-
-def _scanner_visualization(
-    depth: np.ndarray,
-    edges: np.ndarray,
-    gradients: np.ndarray,
-    params: ProcessingParams,
-) -> np.ndarray:
+def _scanner_visualization(depth: np.ndarray, edges: np.ndarray, gradients: np.ndarray, params: ProcessingParams) -> np.ndarray:
     height, width = depth.shape
     base = cv2.applyColorMap((depth * 255).astype(np.uint8), cv2.COLORMAP_OCEAN)
     base = cv2.addWeighted(base, 0.72, np.zeros_like(base), 0.28, 0)
@@ -236,6 +203,31 @@ def _scanner_visualization(
     _draw_overlay(base)
     return _add_noise(base, params.noise_level)
 
+def _photogrammetry_scan(depth: np.ndarray, gradients: np.ndarray, params: ProcessingParams) -> np.ndarray:
+    """Simulate reconstruction noise, occlusion gaps, and mesh artifacts."""
+    base = cv2.applyColorMap((depth * 255).astype(np.uint8), cv2.COLORMAP_CIVIDIS)
+    
+    rng = np.random.default_rng(42)
+    occlusion_mask = (gradients > (0.6 - _unit(params.edge_sensitivity)*0.2)) & (rng.random(depth.shape) < 0.4 + _unit(params.noise_level)*0.4)
+    base[occlusion_mask] = [15, 15, 15]
+    
+    noise = rng.normal(0, 5 + 25 * _unit(params.noise_level), base.shape).astype(np.float32)
+    noisy_base = np.clip(base.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    return noisy_base
+
+def _topographic_scan(depth: np.ndarray, params: ProcessingParams) -> np.ndarray:
+    """Generate contour lines and elevation bands."""
+    bands_count = 10 + _unit(params.depth_contrast) * 30
+    bands = np.floor(depth * bands_count).astype(np.float32)
+    
+    normalized_bands = _normalize(bands)
+    canvas = cv2.applyColorMap((normalized_bands * 255).astype(np.uint8), cv2.COLORMAP_TERRAIN)
+    
+    contours_img = cv2.convertScaleAbs(bands * (255.0 / bands_count))
+    edges = cv2.Canny(contours_img, 50, 150)
+    
+    canvas[edges > 0] = (255, 255, 255)
+    return canvas
 
 def _draw_overlay(canvas: np.ndarray) -> None:
     height, width = canvas.shape[:2]
@@ -243,11 +235,10 @@ def _draw_overlay(canvas: np.ndarray) -> None:
     cv2.rectangle(canvas, (18, 18), (width - 18, height - 18), color, 1, cv2.LINE_AA)
     cv2.line(canvas, (28, 58), (190, 58), color, 1, cv2.LINE_AA)
     cv2.line(canvas, (width - 190, 58), (width - 28, 58), color, 1, cv2.LINE_AA)
-    cv2.putText(canvas, "NEURADEPTH SYSTEM", (30, 44), cv2.FONT_HERSHEY_SIMPLEX, 0.48, color, 1, cv2.LINE_AA)
+    cv2.putText(canvas, "DEPTHFORGE SYSTEM", (30, 44), cv2.FONT_HERSHEY_SIMPLEX, 0.48, color, 1, cv2.LINE_AA)
     cv2.putText(canvas, "AI MONOCULAR DEPTH", (width - 184, height - 34), cv2.FONT_HERSHEY_SIMPLEX, 0.44, color, 1, cv2.LINE_AA)
     center = (width // 2, height // 2)
     cv2.drawMarker(canvas, center, color, markerType=cv2.MARKER_CROSS, markerSize=30, thickness=1, line_type=cv2.LINE_AA)
-
 
 def _add_noise(image: np.ndarray, level: float) -> np.ndarray:
     amount = _unit(level)
@@ -258,7 +249,6 @@ def _add_noise(image: np.ndarray, level: float) -> np.ndarray:
     noisy = image.astype(np.float32) + noise
     return np.clip(noisy, 0, 255).astype(np.uint8)
 
-
 def _normalize(values: np.ndarray) -> np.ndarray:
     values = values.astype(np.float32)
     minimum = float(values.min())
@@ -266,7 +256,6 @@ def _normalize(values: np.ndarray) -> np.ndarray:
     if maximum - minimum < 1e-6:
         return np.zeros_like(values, dtype=np.float32)
     return (values - minimum) / (maximum - minimum)
-
 
 def _unit(value: float) -> float:
     return float(np.clip(value, 0, 100) / 100.0)

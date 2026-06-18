@@ -1,7 +1,8 @@
 import { ChangeEvent, DragEvent, useEffect, useState, useCallback } from "react";
 import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type ScanMode = "depth" | "lidar" | "wireframe" | "mesh" | "scanner";
+type ScanMode = "depth" | "lidar" | "wireframe" | "mesh" | "scanner" | "photogrammetry" | "topographic";
 
 type ControlKey =
   | "scanDensity"
@@ -19,6 +20,8 @@ const modes: Array<{ id: ScanMode; label: string }> = [
   { id: "wireframe", label: "Wireframe" },
   { id: "mesh", label: "Mesh" },
   { id: "scanner", label: "Scanner" },
+  { id: "photogrammetry", label: "Photogrammetry" },
+  { id: "topographic", label: "Topographic" },
 ];
 
 const controlMeta: Array<{ key: ControlKey; label: string }> = [
@@ -40,6 +43,20 @@ const defaults: Record<ControlKey, number> = {
 };
 
 function App() {
+  const [error, setError] = useState<string | null>(null);
+  const [progressMsg, setProgressMsg] = useState<string | null>(null);
+
+  // Initialize WebSocket connection for live progress
+  useEffect(() => {
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws/progress");
+    ws.onmessage = (event) => {
+      setProgressMsg(event.data);
+      if (event.data.includes("successfully") || event.data.includes("Error")) {
+        setTimeout(() => setProgressMsg(null), 4000);
+      }
+    };
+    return () => ws.close();
+  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [sourceUrl, setSourceUrl] = useState<string>("");
   const [resultUrl, setResultUrl] = useState<string>("");
@@ -99,6 +116,42 @@ function App() {
       setIsProcessing(false);
     }
   }, [file, mode, controls, health]);
+
+  const downloadExport = useCallback(async (exportMode: string, extension: string) => {
+    if (!file || health !== "ready") return;
+    setIsProcessing(true);
+    setError("");
+    const form = new FormData();
+    form.append("image", file);
+    form.append("mode", exportMode);
+    form.append("scan_density", String(controls.scanDensity));
+    form.append("noise_level", String(controls.noiseLevel));
+    form.append("edge_sensitivity", String(controls.edgeSensitivity));
+    form.append("depth_contrast", String(controls.depthContrast));
+    form.append("smoothing", String(controls.smoothing));
+    form.append("point_density", String(controls.pointDensity));
+
+    try {
+      const response = await fetch(`${API_URL}/scan`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (!response.ok) throw new Error("Export failed.");
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `depthforge_${exportMode}.${extension}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Export failed.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [file, controls, health]);
 
   // Auto-scan on changes with a 500ms debounce
   useEffect(() => {
@@ -174,10 +227,10 @@ function App() {
             </a>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-black mb-4">
-            NeuraDepth
+            DepthForge
           </h1>
           <p className="text-base md:text-lg max-w-2xl mx-auto text-black/70">
-            Neuromorphic local computer vision depth generator.
+            Professional-grade local computer vision & 3D depth generator.
           </p>
         </div>
       </header>
@@ -186,7 +239,12 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Controls Sidebar */}
-          <div className="lg:col-span-1 space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="lg:col-span-1 space-y-8"
+          >
             <article className="neu-raised p-6 rounded-3xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-black tracking-tight flex items-center gap-2">
@@ -222,6 +280,17 @@ function App() {
                 </div>
 
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-[#FFE5BF] to-transparent my-4"></div>
+                
+                <div>
+                  <label className="text-sm font-medium text-black mb-3 block">Professional Export</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => downloadExport("export_16bit", "png")} className="neu-btn neu-raised p-2 rounded-xl text-[11px] font-medium text-black">16-Bit PNG</button>
+                    <button onClick={() => downloadExport("export_obj", "obj")} className="neu-btn neu-raised p-2 rounded-xl text-[11px] font-medium text-black">3D Mesh (OBJ)</button>
+                    <button onClick={() => downloadExport("export_ply", "ply")} className="neu-btn neu-raised p-2 rounded-xl text-[11px] font-medium text-black">Point Cloud (PLY)</button>
+                  </div>
+                </div>
+
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-[#FFE5BF] to-transparent my-4"></div>
 
                 {controlMeta.map((control) => (
                   <div key={control.key}>
@@ -247,10 +316,29 @@ function App() {
                 {error && <p className="text-xs text-white mt-2 text-center bg-[#F62440]/80 p-2 rounded-lg">{error}</p>}
               </div>
             </article>
-          </div>
+          </motion.div>
 
           {/* Viewers */}
-          <div className="lg:col-span-3 h-full">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            className="lg:col-span-3 h-full relative"
+          >
+            <AnimatePresence>
+              {progressMsg && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -20 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, y: -20 }}
+                  className="absolute top-10 left-1/2 -translate-x-1/2 bg-black/80 text-[#32C5FF] px-6 py-3 rounded-full text-sm font-semibold z-50 backdrop-blur-md shadow-2xl flex items-center gap-3 border border-[#32C5FF]/30"
+                >
+                  <Activity className="w-4 h-4 animate-spin" />
+                  {progressMsg}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <article className="neu-raised p-6 rounded-3xl h-full flex flex-col min-h-[600px]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2 text-black">
@@ -354,7 +442,7 @@ function App() {
                 )}
               </div>
             </article>
-          </div>
+          </motion.div>
 
         </div>
       </main>
