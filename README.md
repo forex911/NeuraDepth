@@ -1,4 +1,4 @@
-# NeuraDepth 👁️
+# NeuraDepth
 
 **NeuraDepth** is an advanced, locally-hosted Neuromorphic UI tool that generates simulated depth maps, LiDAR point clouds, wireframes, and meshes directly from standard 2D input images using computer vision.
 
@@ -6,7 +6,7 @@ Built with a lightning-fast React/Vite frontend and a powerful FastAPI Python ba
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 *   **Modern Neuromorphic Design**: A breathtaking, warm soft-UI aesthetic featuring deep inset shadows, raised interactive components, and a carefully curated cream and crimson color palette (`#FFFAF3`, `#FFF2DB`, `#FFE5BF`, `#F62440`).
 *   **Interactive Comparison Slider**: Instantly compare the original 2D input with the generated depth output using a draggable overlay slider.
@@ -14,7 +14,7 @@ Built with a lightning-fast React/Vite frontend and a powerful FastAPI Python ba
 *   **Drag & Drop Interface**: Seamlessly upload JPG, PNG, and WEBP files.
 *   **Backend Health Monitoring**: Live API connection tracking indicator in the UI.
 
-## 🛠️ Processing Modes
+## Processing Modes
 
 NeuraDepth comes equipped with 5 distinct computer vision generation modes:
 
@@ -24,7 +24,7 @@ NeuraDepth comes equipped with 5 distinct computer vision generation modes:
 4.  **Mesh**: Simulates a triangulated surface mesh mapped over the detected depth contours.
 5.  **Scanner**: Overlays an active horizontal/vertical laser scanner line simulation over the detected geometry.
 
-## 🎛️ Adjustable Parameters
+## Adjustable Parameters
 
 Fine-tune your depth generation with 6 precise sliders:
 *   **Scan Density**: Controls the resolution and spacing of simulated LiDAR points and wireframe vertices.
@@ -36,7 +36,7 @@ Fine-tune your depth generation with 6 precise sliders:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 *   **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React (Icons).
 *   **Backend**: Python 3.9+, FastAPI, Uvicorn, OpenCV (`opencv-python`), Numpy, Python-Multipart.
@@ -44,7 +44,7 @@ Fine-tune your depth generation with 6 precise sliders:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 To run NeuraDepth locally, you will need to start both the backend server and the frontend development server.
 
@@ -90,7 +90,7 @@ Visit `http://localhost:5173` (or the port provided by Vite) in your browser to 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 NeuraDepth/
@@ -112,5 +112,5 @@ NeuraDepth/
 └── README.md
 ```
 
-## 📝 License
+## License
 MIT License. Feel free to use and modify the code.
