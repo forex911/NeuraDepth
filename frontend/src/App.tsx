@@ -1,5 +1,5 @@
 import { ChangeEvent, DragEvent, useEffect, useState } from "react";
-import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity } from "lucide-react";
+import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github } from "lucide-react";
 
 type ScanMode = "depth" | "lidar" | "wireframe" | "mesh" | "scanner";
 
@@ -145,14 +145,25 @@ function App() {
     <div className="text-black transition-colors duration-300">
       <header className="pt-16 pb-8 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-raised-sm mb-6">
-            <span className={`w-2 h-2 rounded-full ${health === "ready" ? "bg-green-400" : health === "offline" ? "bg-[#F62440]" : "bg-yellow-400"} animate-pulse`}></span>
-            <span className="text-xs font-medium tracking-wide uppercase text-black">
-              {health === "ready" ? "Backend Ready" : health === "offline" ? "Backend Offline" : "Checking Backend"}
-            </span>
+          <div className="flex justify-center items-center gap-4 mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-raised-sm">
+              <span className={`w-2 h-2 rounded-full ${health === "ready" ? "bg-green-400" : health === "offline" ? "bg-[#F62440]" : "bg-yellow-400"} animate-pulse`}></span>
+              <span className="text-xs font-medium tracking-wide uppercase text-black">
+                {health === "ready" ? "Backend Ready" : health === "offline" ? "Backend Offline" : "Checking Backend"}
+              </span>
+            </div>
+            <a 
+              href="https://github.com/forex911/NeuraDepth" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-btn neu-raised text-black transition-colors"
+            >
+              <Github size={16} />
+              <span className="text-xs font-semibold tracking-wide">Star on GitHub</span>
+            </a>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-black mb-4">
-            DepthScan UI
+            NeuraDepth
           </h1>
           <p className="text-base md:text-lg max-w-2xl mx-auto text-black/70">
             Neuromorphic local computer vision depth generator.
