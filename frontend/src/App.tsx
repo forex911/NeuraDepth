@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, useEffect, useState, useCallback } from "react";
+import { ChangeEvent, DragEvent, useEffect, useState, useCallback, useRef } from "react";
 import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -65,11 +65,54 @@ function App() {
   const [controls, setControls] = useState(defaults);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState("");
   const [health, setHealth] = useState<"checking" | "ready" | "offline">("checking");
   const [sliderPos, setSliderPos] = useState(50);
   const [isSliding, setIsSliding] = useState(false);
   const [imageAspect, setImageAspect] = useState(1);
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  
+  const [hoveredDepth, setHoveredDepth] = useState<number | null>(null);
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
+  const [histogram, setHistogram] = useState<number[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    if (!resultUrl) return;
+    const img = new Image();
+    img.src = resultUrl;
+    img.onload = () => {
+      if (!canvasRef.current) return;
+      const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+      canvasRef.current.width = img.width;
+      canvasRef.current.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, img.width, img.height).data;
+      const bins = new Array(32).fill(0);
+      for (let i = 0; i < imageData.length; i += 16) { 
+        const brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+        const binIndex = Math.min(31, Math.floor((brightness / 256) * 32));
+        bins[binIndex]++;
+      }
+      const maxBin = Math.max(...bins) || 1;
+      setHistogram(bins.map(b => b / maxBin));
+    };
+  }, [resultUrl]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.code === 'Space') setIsSpacePressed(true); };
+    const handleKeyUp = (e: KeyboardEvent) => { if (e.code === 'Space') setIsSpacePressed(false); };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => { 
+      window.removeEventListener('keydown', handleKeyDown); 
+      window.removeEventListener('keyup', handleKeyUp); 
+    };
+  }, []);
 
   useEffect(() => {
     fetch(`${API_URL}/health`)
@@ -312,6 +355,20 @@ function App() {
                     </div>
                   </div>
                 ))}
+
+                {histogram.length > 0 && mode === "depth" && (
+                  <div className="mt-6">
+                    <label className="text-sm font-medium text-black mb-3 block flex items-center justify-between">
+                      Depth Histogram
+                      <span className="text-[10px] text-black/50 font-mono">NEAR ⟷ FAR</span>
+                    </label>
+                    <div className="flex items-end h-16 gap-[1px] p-2 rounded-xl neu-inset bg-black/5">
+                      {histogram.map((val, i) => (
+                        <div key={i} className="flex-1 bg-gradient-to-t from-[#32C5FF] to-[#32C5FF]/50 rounded-t-[1px] hover:bg-[#F62440] transition-colors" style={{ height: `${Math.max(1, val * 100)}%` }}></div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 {error && <p className="text-xs text-white mt-2 text-center bg-[#F62440]/80 p-2 rounded-lg">{error}</p>}
               </div>
@@ -385,19 +442,70 @@ function App() {
                     <span className="text-sm font-medium animate-pulse text-black/70">Generating Map...</span>
                   </div>
                 ) : resultUrl ? (
-                  <div className="relative w-full h-full flex justify-center items-center select-none">
-                    <div 
-                      className="relative w-full overflow-hidden rounded-lg cursor-ew-resize shadow-lg neu-raised"
-                      style={{ aspectRatio: imageAspect, maxHeight: '100%', maxWidth: `calc(100vh * ${imageAspect})` }}
-                      onMouseMove={(e) => {
-                        if (!isSliding) return;
+                  <div 
+                    className="relative w-full h-full flex justify-center items-center select-none overflow-hidden"
+                    onWheel={(e) => {
+                      // Only zoom if hovering the container
+                      const newScale = Math.min(Math.max(1, scale - e.deltaY * 0.005), 10);
+                      setScale(newScale);
+                    }}
+                    onMouseLeave={() => { setIsSliding(false); setIsPanning(false); setHoveredDepth(null); }}
+                    onMouseUp={() => { setIsSliding(false); setIsPanning(false); }}
+                    onMouseMove={(e) => {
+                      if (isPanning) {
+                        setPan(prev => ({ x: prev.x + e.movementX, y: prev.y + e.movementY }));
+                      } else if (isSliding) {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
                         setSliderPos((x / rect.width) * 100);
+                      }
+                    }}
+                  >
+                    <canvas ref={canvasRef} className="hidden" />
+                    
+                    {hoveredDepth !== null && !isPanning && !isSliding && mode === "depth" && (
+                      <div 
+                        className="fixed pointer-events-none z-[100] bg-black/80 text-[#32C5FF] px-3 py-1.5 rounded-lg text-xs font-mono border border-[#32C5FF]/30 shadow-xl backdrop-blur-md"
+                        style={{ left: hoverPos.x + 15, top: hoverPos.y + 15 }}
+                      >
+                        DEPTH: {hoveredDepth}%
+                      </div>
+                    )}
+
+                    <div 
+                      className={`relative w-full overflow-hidden rounded-lg shadow-lg neu-raised ${isSpacePressed ? 'cursor-grab' : 'cursor-ew-resize'} ${isPanning ? 'cursor-grabbing' : ''}`}
+                      style={{ 
+                        aspectRatio: imageAspect, 
+                        maxHeight: '100%', 
+                        maxWidth: `calc(100vh * ${imageAspect})`,
+                        transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+                        transformOrigin: 'center',
+                        transition: isPanning || isSliding ? 'none' : 'transform 0.1s ease-out'
                       }}
-                      onMouseUp={() => setIsSliding(false)}
-                      onMouseLeave={() => setIsSliding(false)}
-                      onMouseDown={() => setIsSliding(true)}
+                      onMouseDown={(e) => {
+                        if (e.button === 1 || isSpacePressed) {
+                          e.preventDefault();
+                          setIsPanning(true);
+                        } else {
+                          setIsSliding(true);
+                        }
+                      }}
+                      onMouseMove={(e) => {
+                        if (!isPanning && !isSliding && canvasRef.current && mode === "depth") {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const relX = (e.clientX - rect.left) / rect.width;
+                          const relY = (e.clientY - rect.top) / rect.height;
+                          const ctx = canvasRef.current.getContext("2d");
+                          if (ctx && relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+                            const pxX = Math.floor(relX * canvasRef.current.width);
+                            const pxY = Math.floor(relY * canvasRef.current.height);
+                            const pixel = ctx.getImageData(pxX, pxY, 1, 1).data;
+                            const brightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
+                            setHoveredDepth(Math.round((brightness / 255) * 100));
+                            setHoverPos({ x: e.clientX, y: e.clientY });
+                          }
+                        }
+                      }}
                       onTouchMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const touch = e.touches[0];
