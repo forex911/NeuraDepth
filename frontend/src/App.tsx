@@ -144,7 +144,7 @@ function App() {
   return (
     <div className="text-black transition-colors duration-300">
       <header className="pt-16 pb-8 px-4">
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="w-full max-w-[1800px] mx-auto text-center">
           <div className="flex justify-center items-center gap-4 mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-raised-sm">
               <span className={`w-2 h-2 rounded-full ${health === "ready" ? "bg-green-400" : health === "offline" ? "bg-[#F62440]" : "bg-yellow-400"} animate-pulse`}></span>
@@ -171,8 +171,8 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Controls Sidebar */}
           <div className="lg:col-span-1 space-y-8">
@@ -243,7 +243,7 @@ function App() {
           </div>
 
           {/* Viewers */}
-          <div className="lg:col-span-2 h-full">
+          <div className="lg:col-span-3 h-full">
             <article className="neu-raised p-6 rounded-3xl h-full flex flex-col min-h-[600px]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2 text-black">
