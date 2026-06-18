@@ -1,0 +1,273 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#111;--border:#222;--border2:#2a2a2a;--text:#f0f0f0;--muted:#555;--dim:#333}
+.app{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;padding:0;min-height:580px;display:flex;flex-direction:column}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+.nav-brand{font-size:10px;letter-spacing:0.3em;color:var(--text);text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-url{background:none;border:none;border-bottom:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;padding:3px 0;width:220px;outline:none;letter-spacing:0.05em}
+.nav-url:focus{border-color:var(--dim);color:var(--text)}
+.nav-url::placeholder{color:var(--muted)}
+.status-pill{display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--muted)}
+.dot.active{background:#f0f0f0;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.workspace{display:grid;grid-template-columns:1fr 220px;flex:1}
+.canvas-area{border-right:1px solid var(--border);display:grid;grid-template-rows:1fr 1px 1fr}
+.pane{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.pane-tag{position:absolute;top:10px;left:14px;font-size:8px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;z-index:2}
+.pane-img{max-width:100%;max-height:100%;display:block;object-fit:contain}
+.divider{background:var(--border);height:1px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;width:100%;height:100%;min-height:180px}
+.empty-icon{width:36px;height:36px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.empty-text{font-size:9px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase}
+.drop-hint{font-size:8px;color:var(--dim);letter-spacing:0.1em}
+.sidebar{display:flex;flex-direction:column}
+.sidebar-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.section-title{font-size:8px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.control-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.control-row:last-child{margin-bottom:0}
+.ctrl-top{display:flex;justify-content:space-between;align-items:center}
+.ctrl-name{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.ctrl-val{font-size:10px;color:var(--text);font-weight:700;min-width:28px;text-align:right}
+input[type=range].slim{-webkit-appearance:none;width:100%;height:1px;background:var(--border2);outline:none;cursor:pointer}
+input[type=range].slim::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;background:var(--text);border-radius:0;cursor:pointer;transition:transform 0.1s}
+input[type=range].slim::-webkit-slider-thumb:hover{transform:scale(1.4)}
+input[type=range].slim:active::-webkit-slider-thumb{transform:scale(1.2)}
+.toggle-group{display:flex;gap:0}
+.tog{flex:1;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 0;cursor:pointer;transition:all 0.12s}
+.tog:not(:last-child){border-right:none}
+.tog.on{background:var(--text);color:var(--bg)}
+.tog:hover:not(.on){color:var(--text);border-color:var(--dim)}
+.sidebar-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.run-btn{width:100%;background:var(--text);color:var(--bg);border:none;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:11px 0;cursor:pointer;transition:opacity 0.15s;font-weight:700}
+.run-btn:hover{opacity:0.85}
+.run-btn:disabled{opacity:0.25;cursor:not-allowed}
+.run-btn:active{opacity:0.7}
+.meta-row{display:flex;justify-content:space-between;margin-top:10px}
+.meta-item{font-size:8px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase}
+.meta-item span{color:var(--text)}
+.save-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 10px;cursor:pointer;display:none}
+.save-btn:hover{color:var(--text);border-color:var(--dim)}
+.err{font-size:8px;color:#c0392b;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px;min-height:12px}
+.spinner-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.spinner{width:18px;height:18px;border:1px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scan-label{font-size:8px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+input[type=file]{display:none}
+.drag-over .empty-icon{border-color:var(--text)}
+</style>
+
+<h2 class="sr-only">Depth scan generator — upload image, adjust parameters, submit to backend</h2>
+
+<div class="app">
+  <div class="navbar">
+    <span class="nav-brand">DS / Generator</span>
+    <div class="nav-right">
+      <input class="nav-url" id="endpoint" type="text" placeholder="https://api.endpoint/depth" spellcheck="false">
+      <div class="status-pill"><div class="dot" id="status-dot"></div><span id="status-text">Idle</span></div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="canvas-area">
+      <div class="pane" id="input-pane">
+        <span class="pane-tag">Input</span>
+        <div class="empty-state" id="drop-zone" onclick="document.getElementById('file-in').click()" ondragover="dov(event)" ondrop="ddr(event)" ondragleave="dlv(event)">
+          <div class="empty-icon"><i class="ti ti-upload" style="font-size:16px" aria-hidden="true"></i></div>
+          <span class="empty-text">Drop image here</span>
+          <span class="drop-hint">PNG · JPG · WEBP</span>
+        </div>
+        <input type="file" id="file-in" accept="image/png,image/jpeg,image/webp" onchange="onFile(event)">
+      </div>
+      <div class="divider"></div>
+      <div class="pane" id="output-pane">
+        <span class="pane-tag">Depth output</span>
+        <div class="empty-state" id="out-empty" style="cursor:default">
+          <div class="empty-icon" style="cursor:default"><i class="ti ti-photo-scan" style="font-size:16px" aria-hidden="true"></i></div>
+          <span class="empty-text">Awaiting scan</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="section-title">Parameters</div>
+
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Depth range</span><span class="ctrl-val" id="v-range">50m</span></div>
+          <input type="range" class="slim" min="1" max="200" value="50" step="1" oninput="upd('v-range',this.value,'m')">
+        </div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Near clip</span><span class="ctrl-val" id="v-near">0.1m</span></div>
+          <input type="range" class="slim" min="1" max="100" value="10" step="1" oninput="upd('v-near',this.value/10,'m',1)">
+        </div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Smoothing</span><span class="ctrl-val" id="v-smooth">4</span></div>
+          <input type="range" class="slim" min="0" max="10" value="4" step="1" oninput="upd('v-smooth',this.value)">
+        </div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Confidence</span><span class="ctrl-val" id="v-conf">80%</span></div>
+          <input type="range" class="slim" min="0" max="100" value="80" step="1" oninput="upd('v-conf',this.value,'%')">
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Output</div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Colormap</span></div>
+          <div class="toggle-group" style="margin-top:4px">
+            <button class="tog on" onclick="setTog(this,'cmap')">Grey</button>
+            <button class="tog" onclick="setTog(this,'cmap')">Inferno</button>
+            <button class="tog" onclick="setTog(this,'cmap')">Jet</button>
+          </div>
+        </div>
+        <div class="control-row" style="margin-top:8px">
+          <div class="ctrl-top"><span class="ctrl-name">Format</span></div>
+          <div class="toggle-group" style="margin-top:4px">
+            <button class="tog on" onclick="setTog(this,'fmt')">PNG</button>
+            <button class="tog" onclick="setTog(this,'fmt')">16-bit</button>
+            <button class="tog" onclick="setTog(this,'fmt')">EXR</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Post</div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Sharpen</span><span class="ctrl-val" id="v-sharp">0</span></div>
+          <input type="range" class="slim" min="0" max="10" value="0" step="1" oninput="upd('v-sharp',this.value)">
+        </div>
+        <div class="control-row">
+          <div class="ctrl-top"><span class="ctrl-name">Contrast</span><span class="ctrl-val" id="v-contrast">1.0</span></div>
+          <input type="range" class="slim" min="5" max="30" value="10" step="1" oninput="upd('v-contrast',this.value/10,'',1)">
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="err" id="err"></div>
+        <button class="run-btn" id="run-btn" onclick="runScan()" disabled>Scan</button>
+        <div class="meta-row">
+          <span class="meta-item" id="file-meta">No file</span>
+          <button class="save-btn" id="save-btn" onclick="saveResult()"><i class="ti ti-download" aria-hidden="true"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let file = null, resultB64 = null, resultMime = 'image/png';
+const params = { range:50, near:0.1, smooth:4, conf:80, cmap:'Grey', fmt:'PNG', sharp:0, contrast:1.0 };
+
+function upd(id, val, unit='', dec=0) {
+  const v = dec ? parseFloat(val).toFixed(dec) : parseInt(val);
+  document.getElementById(id).textContent = v + unit;
+  const key = {
+    'v-range':'range','v-near':'near','v-smooth':'smooth',
+    'v-conf':'conf','v-sharp':'sharp','v-contrast':'contrast'
+  }[id];
+  if (key) params[key] = parseFloat(v);
+}
+
+function setTog(el, group) {
+  el.closest('.toggle-group').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  if (group === 'cmap') params.cmap = el.textContent.trim();
+  if (group === 'fmt') params.fmt = el.textContent.trim();
+}
+
+function setStatus(text, live) {
+  document.getElementById('status-text').textContent = text;
+  document.getElementById('status-dot').className = 'dot' + (live ? ' active' : '');
+}
+
+function setErr(msg) { document.getElementById('err').textContent = msg; }
+
+function dov(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function dlv(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function ddr(e) { e.preventDefault(); dlv(); const f = e.dataTransfer.files[0]; if(f) loadFile(f); }
+function onFile(e) { if(e.target.files[0]) loadFile(e.target.files[0]); }
+
+function loadFile(f) {
+  if (!f.type.startsWith('image/')) return;
+  file = f;
+  const r = new FileReader();
+  r.onload = (e) => {
+    const pane = document.getElementById('input-pane');
+    const dz = document.getElementById('drop-zone');
+    if (dz) dz.remove();
+    let img = pane.querySelector('img.pane-img');
+    if (!img) { img = document.createElement('img'); img.className = 'pane-img'; pane.appendChild(img); }
+    img.src = e.target.result;
+    document.getElementById('file-meta').innerHTML = '<span>' + (f.name.length > 16 ? f.name.slice(0,14)+'…' : f.name) + '</span>';
+    document.getElementById('run-btn').disabled = false;
+    setErr('');
+    setStatus('Ready', false);
+  };
+  r.readAsDataURL(f);
+}
+
+async function runScan() {
+  const url = document.getElementById('endpoint').value.trim();
+  if (!url) { setErr('Set endpoint URL'); return; }
+  if (!file) return;
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  setErr('');
+  setStatus('Scanning', true);
+
+  const outPane = document.getElementById('output-pane');
+  let empty = document.getElementById('out-empty');
+  if (empty) empty.remove();
+  let spinWrap = outPane.querySelector('.spinner-wrap');
+  if (!spinWrap) {
+    spinWrap = document.createElement('div');
+    spinWrap.className = 'spinner-wrap';
+    spinWrap.innerHTML = '<div class="spinner"></div><span class="scan-label">Processing</span>';
+    outPane.appendChild(spinWrap);
+  } else { spinWrap.style.display = 'flex'; }
+  let existImg = outPane.querySelector('img.pane-img');
+  if (existImg) existImg.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('image', file);
+  Object.entries(params).forEach(([k,v]) => fd.append(k, v));
+
+  try {
+    const res = await fetch(url, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const b64 = data.image || data.depth_image || data.result || data.output;
+    if (!b64) throw new Error('No image in response');
+
+    resultMime = data.mime_type || 'image/png';
+    resultB64 = b64;
+    const src = b64.startsWith('data:') ? b64 : `data:${resultMime};base64,${b64}`;
+
+    spinWrap.style.display = 'none';
+    if (!existImg) { existImg = document.createElement('img'); existImg.className = 'pane-img'; outPane.appendChild(existImg); }
+    existImg.src = src;
+    existImg.style.display = 'block';
+    document.getElementById('save-btn').style.display = 'inline-block';
+    setStatus('Done', false);
+  } catch(err) {
+    spinWrap.style.display = 'none';
+    if (existImg) existImg.style.display = 'block';
+    setErr(err.message);
+    setStatus('Error', false);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function saveResult() {
+  if (!resultB64) return;
+  const src = resultB64.startsWith('data:') ? resultB64 : `data:${resultMime};base64,${resultB64}`;
+  const a = document.createElement('a');
+  a.href = src; a.download = 'depth_scan.' + (resultMime.split('/')[1] || 'png'); a.click();
+}
+</script>
