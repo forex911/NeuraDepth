@@ -124,7 +124,7 @@ def _lidar_scan(depth: np.ndarray, edges: np.ndarray, params: ProcessingParams) 
 
     values = np.clip(sampled_depth * 255, 0, 255).astype(np.uint8)
     colors = cv2.applyColorMap(values, cv2.COLORMAP_TURBO)
-    canvas[py[keep], px[keep]] = colors[keep, 0]
+    canvas[py[keep], px[keep]] = colors[keep]
 
     edge_points = cv2.dilate(edges, np.ones((2, 2), np.uint8), iterations=1)
     canvas[edge_points > 0] = np.maximum(canvas[edge_points > 0], np.array([70, 210, 255], dtype=np.uint8))
@@ -221,7 +221,30 @@ def _topographic_scan(depth: np.ndarray, params: ProcessingParams) -> np.ndarray
     bands = np.floor(depth * bands_count).astype(np.float32)
     
     normalized_bands = _normalize(bands)
-    canvas = cv2.applyColorMap((normalized_bands * 255).astype(np.uint8), cv2.COLORMAP_TERRAIN)
+
+    # Build a terrain-like LUT (deep blue -> green -> brown -> white)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    # Key color stops: (index, B, G, R)
+    stops = [
+        (0,   120, 60,  20),   # deep water blue-green
+        (50,  100, 160, 40),   # green lowlands
+        (120, 40,  180, 80),   # bright green
+        (170, 30,  140, 160),  # brown highlands
+        (210, 80,  160, 200),  # tan
+        (240, 220, 230, 240),  # snow/white peaks
+        (255, 255, 255, 255),  # white
+    ]
+    for i in range(len(stops) - 1):
+        idx0, b0, g0, r0 = stops[i]
+        idx1, b1, g1, r1 = stops[i + 1]
+        n = idx1 - idx0
+        for j in range(n):
+            t = j / max(n, 1)
+            lut[idx0 + j, 0] = [int(b0 + (b1 - b0) * t), int(g0 + (g1 - g0) * t), int(r0 + (r1 - r0) * t)]
+    lut[255, 0] = [255, 255, 255]
+
+    gray = (normalized_bands * 255).astype(np.uint8)
+    canvas = cv2.LUT(cv2.merge([gray, gray, gray]), lut)
     
     contours_img = cv2.convertScaleAbs(bands * (255.0 / bands_count))
     edges = cv2.Canny(contours_img, 50, 150)

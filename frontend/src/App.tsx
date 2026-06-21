@@ -1,5 +1,5 @@
 import { ChangeEvent, DragEvent, useEffect, useState, useCallback, useRef } from "react";
-import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github, Box } from "lucide-react";
+import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Loader2, Activity, Github, Box } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ThreeDViewer from "./ThreeDViewer";
 
@@ -52,8 +52,10 @@ function App() {
     const ws = new WebSocket("ws://127.0.0.1:8000/ws/progress");
     ws.onmessage = (event) => {
       setProgressMsg(event.data);
-      if (event.data.includes("successfully") || event.data.includes("Error")) {
-        setTimeout(() => setProgressMsg(null), 4000);
+      if (event.data.includes("successfully")) {
+        setTimeout(() => setProgressMsg(null), 1500);
+      } else if (event.data.includes("Error")) {
+        setTimeout(() => setProgressMsg(null), 3000);
       }
     };
     return () => ws.close();
@@ -251,46 +253,42 @@ function App() {
   }
 
   return (
-    <div className="text-black transition-colors duration-300">
-      <header className="pt-16 pb-8 px-4">
-        <div className="w-full max-w-[1800px] mx-auto text-center">
-          <div className="flex justify-center items-center gap-4 mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-raised-sm">
+    <div className="h-screen w-full flex flex-col bg-[#FFFDF9] text-black selection:bg-[#F62440] selection:text-white overflow-hidden font-sans transition-colors duration-300">
+      <header className="shrink-0 p-4 lg:p-6 pb-4">
+        <div className="w-full max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-black">
+              NeuraDepth
+            </h1>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full neu-raised-sm">
               <span className={`w-2 h-2 rounded-full ${health === "ready" ? "bg-green-400" : health === "offline" ? "bg-[#F62440]" : "bg-yellow-400"} animate-pulse`}></span>
-              <span className="text-xs font-medium tracking-wide uppercase text-black">
-                {health === "ready" ? "Backend Ready" : health === "offline" ? "Backend Offline" : "Checking Backend"}
+              <span className="text-[10px] font-bold tracking-wide uppercase text-black">
+                {health === "ready" ? "Ready" : health === "offline" ? "Offline" : "Checking"}
               </span>
             </div>
-            <a 
-              href="https://github.com/forex911/NeuraDepth" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-btn neu-raised text-black transition-colors hover:text-[#F62440]"
-            >
-              <Github size={16} />
-              <span className="text-xs font-semibold tracking-wide">Star on GitHub</span>
-            </a>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-black mb-4">
-            NeuraDepth
-          </h1>
-          <p className="text-base md:text-lg max-w-2xl mx-auto text-black/70">
-            Professional-grade local computer vision & 3D depth generator.
-          </p>
+          <a 
+            href="https://github.com/forex911/NeuraDepth" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full neu-btn neu-raised text-black transition-colors hover:text-[#F62440]"
+          >
+            <Github size={16} />
+            <span className="text-xs font-semibold tracking-wide">Star on GitHub</span>
+          </a>
         </div>
       </header>
 
-      <main className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <main className="flex-1 min-h-0 w-full max-w-[1800px] mx-auto px-4 lg:px-6 pb-6 flex flex-col lg:flex-row gap-6">
           
           {/* Controls Sidebar */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="lg:col-span-1 space-y-8"
+            className="w-full lg:w-[320px] xl:w-[350px] shrink-0 h-full flex flex-col"
           >
-            <article className="neu-raised p-6 rounded-3xl">
+            <article className="neu-raised p-6 rounded-3xl flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-black tracking-tight flex items-center gap-2">
                   <Settings2 size={20} />
@@ -298,7 +296,7 @@ function App() {
                 </h2>
                 {isProcessing && (
                   <span className="flex items-center gap-2 text-xs font-medium text-[#F62440] animate-pulse">
-                    <Activity size={14} className="animate-spin" />
+                    <Loader2 size={14} className="animate-spin" />
                     Syncing
                   </span>
                 )}
@@ -360,7 +358,7 @@ function App() {
 
                 {histogram.length > 0 && mode === "depth" && (
                   <div className="mt-6">
-                    <label className="text-sm font-medium text-black mb-3 block flex items-center justify-between">
+                    <label className="text-sm font-medium text-black mb-3 flex items-center justify-between">
                       Depth Histogram
                       <span className="text-[10px] text-black/50 font-mono">NEAR ⟷ FAR</span>
                     </label>
@@ -382,23 +380,23 @@ function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="lg:col-span-3 h-full relative"
+            className="flex-1 min-w-0 h-full relative"
           >
             <AnimatePresence>
               {progressMsg && (
                 <motion.div 
-                  initial={{ opacity: 0, y: -20 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0, y: -20 }}
-                  className="absolute top-10 left-1/2 -translate-x-1/2 bg-black/80 text-[#32C5FF] px-6 py-3 rounded-full text-sm font-semibold z-50 backdrop-blur-md shadow-2xl flex items-center gap-3 border border-[#32C5FF]/30"
+                  initial={{ opacity: 0, x: 40 }} 
+                  animate={{ opacity: 1, x: 0 }} 
+                  exit={{ opacity: 0, x: 40 }}
+                  className="fixed bottom-8 right-8 neu-raised text-[#F62440] px-6 py-4 rounded-2xl text-sm font-bold z-[100] flex items-center gap-4 shadow-2xl"
                 >
-                  <Activity className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin text-[#F62440]" />
                   {progressMsg}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <article className="neu-raised p-6 rounded-3xl h-full flex flex-col min-h-[600px]">
+            <article className="neu-raised p-6 rounded-3xl h-full flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2 text-black">
@@ -480,6 +478,15 @@ function App() {
                       }
                     }}
                   >
+                    {/* Reprocessing overlay */}
+                    {isProcessing && (
+                      <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-lg">
+                        <div className="neu-raised px-6 py-4 rounded-2xl flex items-center gap-3">
+                          <Loader2 className="w-5 h-5 animate-spin text-[#F62440]" />
+                          <span className="text-sm font-semibold text-black">Regenerating…</span>
+                        </div>
+                      </div>
+                    )}
                     <canvas ref={canvasRef} className="hidden" />
                     
                     {hoveredDepth !== null && !isPanning && !isSliding && mode === "depth" && (
@@ -514,7 +521,7 @@ function App() {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const relX = (e.clientX - rect.left) / rect.width;
                           const relY = (e.clientY - rect.top) / rect.height;
-                          const ctx = canvasRef.current.getContext("2d");
+                          const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true });
                           if (ctx && relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
                             const pxX = Math.floor(relX * canvasRef.current.width);
                             const pxY = Math.floor(relY * canvasRef.current.height);
@@ -524,6 +531,11 @@ function App() {
                             setHoverPos({ x: e.clientX, y: e.clientY });
                           }
                         }
+                      }}
+                      onWheel={(e) => {
+                        // Adjust slider position based on wheel scroll direction
+                        const sensitivity = 0.05; // Adjust this value to change scroll speed
+                        setSliderPos((prev) => Math.max(0, Math.min(100, prev + e.deltaY * sensitivity)));
                       }}
                       onTouchMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
@@ -570,8 +582,6 @@ function App() {
               </div>
             </article>
           </motion.div>
-
-        </div>
       </main>
     </div>
   );

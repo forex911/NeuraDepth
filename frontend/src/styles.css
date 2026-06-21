@@ -147,10 +147,10 @@
     position: relative;
     border-radius: 16px;
     overflow: hidden;
-    background: linear-gradient(145deg, var(--neu-bg-secondary), var(--neu-bg-primary));
+    background: radial-gradient(circle at center, #2a2a2a 0%, #0d0d0d 100%);
     box-shadow:
-      inset 4px 4px 8px var(--neu-shadow-dark),
-      inset -4px -4px 8px var(--neu-shadow-light);
+      inset 4px 4px 12px rgba(0, 0, 0, 0.5),
+      inset -4px -4px 12px rgba(0, 0, 0, 0.8);
   }
 
   .three-viewer-canvas-wrap canvas {
