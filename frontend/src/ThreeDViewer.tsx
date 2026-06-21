@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
-import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { Grid3x3, RotateCcw, ZoomIn, Move } from "lucide-react";
+import { Grid3x3, RotateCcw, ZoomIn, Move, LocateFixed } from "lucide-react";
 
 // ── OBJ Parser — extracts positions, indices, and computes UVs ──────────────
 function parseOBJWithUVs(text: string): THREE.BufferGeometry {
@@ -123,9 +123,10 @@ function TexturedMesh({
   );
 }
 
-// ── Auto-fit camera to bounding box ─────────────────────────────────────────
-function AutoFit({ geometry }: { geometry: THREE.BufferGeometry }) {
+// ── Scene Controller (Auto-fit & Orbit Controls) ────────────────────────────
+function SceneController({ geometry, resetToggle }: { geometry: THREE.BufferGeometry; resetToggle: boolean }) {
   const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
 
   useEffect(() => {
     geometry.computeBoundingBox();
@@ -144,9 +145,28 @@ function AutoFit({ geometry }: { geometry: THREE.BufferGeometry }) {
       camera.far = dist * 10;
       camera.updateProjectionMatrix();
     }
-  }, [geometry, camera]);
 
-  return null;
+    if (controlsRef.current) {
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
+    }
+  }, [geometry, camera, resetToggle]);
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      makeDefault
+      enableDamping
+      dampingFactor={0.08}
+      minDistance={5}
+      maxDistance={500}
+      enablePan
+      panSpeed={0.8}
+      rotateSpeed={0.6}
+      zoomSpeed={0.8}
+      zoomToCursor
+    />
+  );
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
@@ -162,6 +182,7 @@ export default function ThreeDViewer({ file, controls, apiUrl, sourceUrl }: Thre
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [wireframe, setWireframe] = useState(false);
+  const [resetToggle, setResetToggle] = useState(false);
   const [vertexCount, setVertexCount] = useState(0);
   const [faceCount, setFaceCount] = useState(0);
 
@@ -222,6 +243,15 @@ export default function ThreeDViewer({ file, controls, apiUrl, sourceUrl }: Thre
           <span>{wireframe ? "Solid" : "Wire"}</span>
         </button>
         <button
+          onClick={() => setResetToggle((prev) => !prev)}
+          className="neu-btn neu-raised three-viewer-tool-btn"
+          title="Center View"
+          disabled={!geometry}
+        >
+          <LocateFixed size={15} />
+          <span>Center</span>
+        </button>
+        <button
           onClick={fetchModel}
           className="neu-btn neu-raised three-viewer-tool-btn"
           title="Refresh Model"
@@ -268,23 +298,10 @@ export default function ThreeDViewer({ file, controls, apiUrl, sourceUrl }: Thre
           >
             {geometry && sourceUrl && (
               <>
-                <AutoFit geometry={geometry} />
+                <SceneController geometry={geometry} resetToggle={resetToggle} />
                 <TexturedMesh geometry={geometry} textureUrl={sourceUrl} wireframe={wireframe} />
               </>
             )}
-
-            <OrbitControls
-              makeDefault
-              enableDamping
-              dampingFactor={0.08}
-              minDistance={5}
-              maxDistance={500}
-              enablePan
-              panSpeed={0.8}
-              rotateSpeed={0.6}
-              zoomSpeed={0.8}
-              zoomToCursor
-            />
           </Canvas>
         )}
       </div>
