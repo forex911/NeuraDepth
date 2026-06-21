@@ -1,42 +1,60 @@
-# NeuraDepth
+# 🌊 NeuraDepth
 
-**NeuraDepth** is an advanced, locally-hosted application that uses state-of-the-art Deep Learning to generate depth maps and 3D meshes from standard 2D input images. 
+**NeuraDepth** is an advanced, professional-grade local web application that utilizes state-of-the-art Deep Learning to generate high-precision depth maps and interactive 3D structures from standard 2D input images.
 
-Built with a lightning-fast React frontend and a powerful FastAPI Python backend, NeuraDepth allows users to instantly visualize, interact with, and export 3D approximations of any 2D image, running entirely locally without the need for cloud APIs.
+Built with a lightning-fast React frontend and a powerful FastAPI Python backend, NeuraDepth allows users to instantly visualize, analyze, interact with, and export 3D approximations of any 2D image—running entirely locally with zero reliance on cloud APIs or external servers.
+
+![NeuraDepth Interface](https://raw.githubusercontent.com/forex911/NeuraDepth/main/frontend/public/screenshot.png) *(Note: Placeholder for actual screenshot)*
 
 ---
 
 ## 🌟 Key Features
 
-*   **Deep Learning Depth Estimation**: Utilizes the powerful **MiDaS** model via PyTorch to intelligently estimate real-world depth from single 2D images.
-*   **Interactive 3D Viewer**: A fully integrated, in-browser 3D canvas built with `Three.js` and `@react-three/fiber` that lets you orbit, pan, and zoom around your generated 3D meshes instantly.
-*   **Real-Time Progress & WebSockets**: Heavy ML processing runs asynchronously in the backend, communicating real-time progress updates and status messages to the frontend via WebSockets.
-*   **Modern Neuromorphic UI**: A breathtaking, premium soft-UI aesthetic featuring deep inset shadows, raised interactive components, and dynamic hover states.
-*   **Interactive Comparison Slider**: Instantly compare the original 2D input with the generated depth output using a sleek, draggable overlay slider.
-*   **One-Click Start**: Includes a `start.bat` script for Windows users to effortlessly spin up both the backend and frontend simultaneously.
+*   **🧠 Deep Learning Depth Estimation**: Utilizes the powerful **MiDaS** model via PyTorch to intelligently estimate real-world depth from single 2D images.
+*   **🎮 Interactive 3D Viewer**: A fully integrated, in-browser 3D canvas built with `Three.js` and `@react-three/fiber`. Instantly orbit, pan, and zoom around your generated 3D meshes or ultra-dense point clouds.
+*   **🖱️ Intuitive UX & Controls**: 
+    *   **Mouse-Wheel Comparison Slider**: Effortlessly compare the original 2D input with the generated depth output by hovering and scrolling your mouse wheel.
+    *   **Hover Depth Inspection**: See the exact depth percentage at any pixel simply by hovering your cursor over the map.
+*   **⚡ Real-Time WebSockets**: Heavy ML processing runs asynchronously in the backend, communicating real-time progress updates, success messages, and errors to the frontend via a sleek Neumorphic toast notification system.
+*   **✨ Premium Neumorphic UI**: A breathtaking soft-UI aesthetic featuring deep inset shadows, raised interactive components, smooth animations, and a high-contrast 3D viewport.
+*   **🛠️ One-Click Start**: Includes a `start.bat` script for Windows users to effortlessly spin up both the backend and frontend simultaneously.
 
-## 🛠️ Processing Modes
+---
 
-NeuraDepth comes equipped with versatile processing and export modes:
+## 📸 Processing & Visual Modes
+
+NeuraDepth comes equipped with highly optimized, OpenCV-driven processing modes for different visual analyses:
 
 1.  **Depth Map**: Generates a highly accurate, AI-driven grayscale depth map using MiDaS.
-2.  **3D Mesh (.OBJ)**: Extrudes the original image into a physical 3D surface based on the depth map, generating a UV-mapped `.obj` file you can view in-app or import into Blender/Unity.
-3.  **Experimental Modes**: Includes visual simulations like LiDAR point clouds, wireframes, and scanner overlays.
+2.  **LIDAR**: Simulates a LiDAR point cloud scan by selectively sampling depth data and rendering color-mapped points with realistic noise jitter.
+3.  **Topographic**: Generates authentic contour lines and elevation bands using a custom deep water-to-snow terrain colormap.
+4.  **Wireframe**: Extracts high-frequency details and overlays a sleek, tech-inspired contour wireframe onto the depth map.
+5.  **Mesh**: Renders an interconnected network of vector lines simulating a structured 3D topological grid.
+6.  **Photogrammetry**: Simulates the artifacts, occlusion gaps, and noise of a photogrammetry reconstruction.
+7.  **Scanner**: A sci-fi inspired visualization with sweeping scan lines and UI overlays.
 
 ## 🎛️ Adjustable Parameters
 
-Fine-tune your depth generation with interactive UI sliders:
-*   **Scan Density**: Controls the resolution and spacing of the generated mesh vertices.
-*   **Depth Contrast**: Amplifies the perceived depth difference between the foreground and background.
-*   **Smoothing**: Applies intelligent blurring (Gaussian/Bilateral) to remove harsh artifacts and create organic transitions in the depth map.
-*   **Noise & Edge Sensitivity**: Advanced parameters for experimental edge-detection filters.
+Fine-tune your depth generation with interactive UI sliders that immediately trigger debounced background regeneration:
+*   **Scan Density**: Controls the resolution and spacing of the generated visual artifacts (like LiDAR points or Mesh lines).
+*   **Point Density**: Dictates the fill-rate of simulated point clouds.
+*   **Depth Contrast**: Amplifies the perceived depth difference between the foreground and background, flattening or exaggerating the topography.
+*   **Smoothing**: Applies intelligent Gaussian blurring to remove harsh artifacts and create organic transitions in the depth map.
+*   **Noise & Edge Sensitivity**: Advanced parameters to inject realistic noise or isolate sharp physical boundaries.
+
+## 💾 Professional Export
+
+Easily export your results for use in professional 3D software (Blender, Unity, Unreal Engine, Maya):
+*   **16-Bit PNG**: Lossless high-precision depth map.
+*   **3D Mesh (.OBJ)**: Extrudes the original image into a physical 3D surface based on the depth map, generating a UV-mapped `.obj` file.
+*   **Point Cloud (.PLY)**: Generates a 3D point cloud file containing spatial coordinates and original RGB color data.
 
 ---
 
 ## 🏗️ Architecture Stack
 
-*   **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React (Icons), `@react-three/fiber`, `@react-three/drei`.
-*   **Backend**: Python 3.9+, FastAPI, Uvicorn, PyTorch (`torch`, `torchvision`), OpenCV (`opencv-python`), WebSockets.
+*   **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React (Icons), Framer Motion, `@react-three/fiber`, `@react-three/drei`, `three`.
+*   **Backend**: Python 3.9+, FastAPI, Uvicorn, PyTorch (`torch`, `torchvision`), OpenCV (`opencv-python`), Numpy, WebSockets.
 *   **Communication**: `multipart/form-data` REST API & standard WebSockets for telemetry.
 
 ---
@@ -74,7 +92,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 **2. Start the Frontend (React + Vite)**
-The frontend serves the Neuromorphic UI and 3D Canvas.
+The frontend serves the Neumorphic UI and 3D Canvas.
 
 ```bash
 cd frontend
@@ -96,20 +114,23 @@ Visit `http://localhost:5173` (or the port provided by Vite) in your browser to 
 NeuraDepth/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py         # FastAPI endpoints, CORS, WebSockets
-│   │   ├── processor.py    # Core PyTorch (MiDaS) & OpenCV logic
+│   │   ├── main.py             # FastAPI endpoints, CORS, WebSockets
+│   │   ├── processor.py        # OpenCV rendering & parameters logic
+│   │   ├── services/
+│   │   │   ├── depth_engine.py # Core PyTorch (MiDaS) inference
+│   │   │   └── export_service.py # OBJ and PLY generation logic
 │   │   └── __init__.py
-│   └── requirements.txt    # Python ML dependencies
+│   └── requirements.txt        # Python ML dependencies
 ├── frontend/
 │   ├── src/
-│   │   ├── App.tsx         # Main UI, state management, Sliders
-│   │   ├── ThreeDViewer.tsx# 3D Canvas, OrbitControls, Scene Management
-│   │   ├── main.tsx        # React root
-│   │   └── styles.css      # Custom Neuromorphic Tailwind configuration
-│   ├── package.json        # Node dependencies
-│   ├── tailwind.config.js  # Tailwind classes
-│   └── vite.config.ts      # Vite bundler config
-├── start.bat               # Windows one-click startup script
+│   │   ├── App.tsx             # Main UI, state management, Sliders
+│   │   ├── ThreeDViewer.tsx    # 3D Canvas, Point Cloud & Solid rendering
+│   │   ├── main.tsx            # React root
+│   │   └── styles.css          # Custom Neumorphic Tailwind configuration
+│   ├── package.json            # Node dependencies
+│   ├── tailwind.config.js      # Tailwind classes
+│   └── vite.config.ts          # Vite bundler config
+├── start.bat                   # Windows one-click startup script
 └── README.md
 ```
 
