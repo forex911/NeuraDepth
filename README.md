@@ -4,7 +4,7 @@
 
 Built with a lightning-fast React frontend and a powerful FastAPI Python backend, NeuraDepth allows users to instantly visualize, analyze, interact with, and export 3D approximations of any 2D image—running entirely locally with zero reliance on cloud APIs or external servers.
 
-![NeuraDepth Interface](https://raw.githubusercontent.com/forex911/NeuraDepth/main/frontend/public/screenshot.png) *(Note: Placeholder for actual screenshot)*
+![NeuraDepth Interface](https://raw.githubusercontent.com/forex911/NeuraDepth/main/frontend/public/screenshot.png)
 
 ---
 
