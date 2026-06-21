@@ -76,13 +76,7 @@ end_header
                 idx3 = (y + 1) * w + x + 1
                 idx4 = idx3 + 1
                 
-                # Only connect faces if the depth gradient isn't a massive cliff
-                z1 = small_depth[y, x]
-                z2 = small_depth[y, x+1]
-                z3 = small_depth[y+1, x]
-                
-                if abs(z1 - z2) < 0.1 and abs(z1 - z3) < 0.1:
-                    lines.append(f"f {idx1} {idx2} {idx3}\n")
-                    lines.append(f"f {idx2} {idx4} {idx3}\n")
+                lines.append(f"f {idx1} {idx2} {idx3}\n")
+                lines.append(f"f {idx2} {idx4} {idx3}\n")
                 
         return "".join(lines).encode('utf-8')

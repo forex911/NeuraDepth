@@ -1,6 +1,7 @@
 import { ChangeEvent, DragEvent, useEffect, useState, useCallback, useRef } from "react";
-import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github } from "lucide-react";
+import { Download, Scan, Upload, Settings2, Image as ImageIcon, Layers, Activity, Github, Box } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThreeDViewer from "./ThreeDViewer";
 
 type ScanMode = "depth" | "lidar" | "wireframe" | "mesh" | "scanner" | "photogrammetry" | "topographic";
 
@@ -66,6 +67,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [health, setHealth] = useState<"checking" | "ready" | "offline">("checking");
+  const [viewMode, setViewMode] = useState<"compare" | "3d">("compare");
   const [sliderPos, setSliderPos] = useState(50);
   const [isSliding, setIsSliding] = useState(false);
   const [imageAspect, setImageAspect] = useState(1);
@@ -398,14 +400,34 @@ function App() {
 
             <article className="neu-raised p-6 rounded-3xl h-full flex flex-col min-h-[600px]">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2 text-black">
-                  <ImageIcon size={20} />
-                  {resultUrl ? "Compare Mode" : "Workspace"}
-                </h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2 text-black">
+                    {viewMode === "3d" ? <Box size={20} /> : <ImageIcon size={20} />}
+                    {!sourceUrl ? "Workspace" : viewMode === "3d" ? "3D Viewer" : "Compare Mode"}
+                  </h2>
+                  {resultUrl && (
+                    <div className="view-toggle-group">
+                      <button
+                        onClick={() => setViewMode("compare")}
+                        className={`view-toggle-btn ${viewMode === "compare" ? "active" : ""}`}
+                      >
+                        <Layers size={13} />
+                        Compare
+                      </button>
+                      <button
+                        onClick={() => setViewMode("3d")}
+                        className={`view-toggle-btn ${viewMode === "3d" ? "active" : ""}`}
+                      >
+                        <Box size={13} />
+                        3D View
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   {sourceUrl && (
                     <button 
-                      onClick={() => { setFile(null); setSourceUrl(""); setResultUrl(""); }}
+                      onClick={() => { setFile(null); setSourceUrl(""); setResultUrl(""); setViewMode("compare"); }}
                       className="neu-raised neu-btn px-4 py-2 rounded-xl text-xs font-medium text-black"
                     >
                       Clear
@@ -441,14 +463,11 @@ function App() {
                     <div className="w-12 h-12 rounded-full border-4 border-[#FFE5BF] border-t-[#F62440] animate-spin"></div>
                     <span className="text-sm font-medium animate-pulse text-black/70">Generating Map...</span>
                   </div>
+                ) : resultUrl && viewMode === "3d" ? (
+                  <ThreeDViewer file={file} controls={controls} apiUrl={API_URL} sourceUrl={sourceUrl} />
                 ) : resultUrl ? (
                   <div 
                     className="relative w-full h-full flex justify-center items-center select-none overflow-hidden"
-                    onWheel={(e) => {
-                      // Only zoom if hovering the container
-                      const newScale = Math.min(Math.max(1, scale - e.deltaY * 0.005), 10);
-                      setScale(newScale);
-                    }}
                     onMouseLeave={() => { setIsSliding(false); setIsPanning(false); setHoveredDepth(null); }}
                     onMouseUp={() => { setIsSliding(false); setIsPanning(false); }}
                     onMouseMove={(e) => {
