@@ -1,8 +1,8 @@
-# DepthForge
+# NeuraDepth
 
-**DepthForge** is an advanced, locally-hosted application that uses state-of-the-art Deep Learning to generate depth maps and 3D meshes from standard 2D input images. 
+**NeuraDepth** is an advanced, locally-hosted application that uses state-of-the-art Deep Learning to generate depth maps and 3D meshes from standard 2D input images. 
 
-Built with a lightning-fast React frontend and a powerful FastAPI Python backend, DepthForge allows users to instantly visualize, interact with, and export 3D approximations of any 2D image, running entirely locally without the need for cloud APIs.
+Built with a lightning-fast React frontend and a powerful FastAPI Python backend, NeuraDepth allows users to instantly visualize, interact with, and export 3D approximations of any 2D image, running entirely locally without the need for cloud APIs.
 
 ---
 
@@ -17,7 +17,7 @@ Built with a lightning-fast React frontend and a powerful FastAPI Python backend
 
 ## 🛠️ Processing Modes
 
-DepthForge comes equipped with versatile processing and export modes:
+NeuraDepth comes equipped with versatile processing and export modes:
 
 1.  **Depth Map**: Generates a highly accurate, AI-driven grayscale depth map using MiDaS.
 2.  **3D Mesh (.OBJ)**: Extrudes the original image into a physical 3D surface based on the depth map, generating a UV-mapped `.obj` file you can view in-app or import into Blender/Unity.
@@ -86,14 +86,14 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173` (or the port provided by Vite) in your browser to start using DepthForge!
+Visit `http://localhost:5173` (or the port provided by Vite) in your browser to start using NeuraDepth!
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-DepthForge/
+NeuraDepth/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py         # FastAPI endpoints, CORS, WebSockets

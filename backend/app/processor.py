@@ -235,7 +235,7 @@ def _draw_overlay(canvas: np.ndarray) -> None:
     cv2.rectangle(canvas, (18, 18), (width - 18, height - 18), color, 1, cv2.LINE_AA)
     cv2.line(canvas, (28, 58), (190, 58), color, 1, cv2.LINE_AA)
     cv2.line(canvas, (width - 190, 58), (width - 28, 58), color, 1, cv2.LINE_AA)
-    cv2.putText(canvas, "DEPTHFORGE SYSTEM", (30, 44), cv2.FONT_HERSHEY_SIMPLEX, 0.48, color, 1, cv2.LINE_AA)
+    cv2.putText(canvas, "NEURADEPTH SYSTEM", (30, 44), cv2.FONT_HERSHEY_SIMPLEX, 0.48, color, 1, cv2.LINE_AA)
     cv2.putText(canvas, "AI MONOCULAR DEPTH", (width - 184, height - 34), cv2.FONT_HERSHEY_SIMPLEX, 0.44, color, 1, cv2.LINE_AA)
     center = (width // 2, height // 2)
     cv2.drawMarker(canvas, center, color, markerType=cv2.MARKER_CROSS, markerSize=30, thickness=1, line_type=cv2.LINE_AA)

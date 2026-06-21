@@ -10,7 +10,7 @@ from .processor import ProcessingParams, process_image
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
-    title="DepthForge API",
+    title="NeuraDepth API",
     description="Professional-grade local AI 3D depth generator.",
     version="2.0.0",
 )

@@ -61,7 +61,7 @@ end_header
             small_depth = depth_map
             
         h, w = small_depth.shape
-        lines = ["o DepthForgeMesh\n"]
+        lines = ["o NeuraDepthMesh\n"]
         
         z_scale = max(w, h) * 0.3
         for y in range(h):

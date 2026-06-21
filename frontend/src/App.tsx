@@ -188,7 +188,7 @@ function App() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `depthforge_${exportMode}.${extension}`;
+      a.download = `neuradepth_${exportMode}.${extension}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (requestError) {
@@ -272,7 +272,7 @@ function App() {
             </a>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-black mb-4">
-            DepthForge
+            NeuraDepth
           </h1>
           <p className="text-base md:text-lg max-w-2xl mx-auto text-black/70">
             Professional-grade local computer vision & 3D depth generator.
