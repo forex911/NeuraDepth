@@ -462,7 +462,7 @@ function App() {
                     <span className="text-sm font-medium animate-pulse text-black/70">Generating Map...</span>
                   </div>
                 ) : resultUrl && viewMode === "3d" ? (
-                  <ThreeDViewer file={file} controls={controls} apiUrl={API_URL} sourceUrl={sourceUrl} />
+                  <ThreeDViewer file={file} controls={controls} apiUrl={API_URL} sourceUrl={sourceUrl} scanMode={mode} />
                 ) : resultUrl ? (
                   <div 
                     className="relative w-full h-full flex justify-center items-center select-none overflow-hidden"
