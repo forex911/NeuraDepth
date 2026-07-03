@@ -1,6 +1,10 @@
+<div align="center">
+
 # NeuraDepth
 
-<div align="center">
+### AI-Powered Depth Estimation, 3D Reconstruction & Interactive Visualization
+
+Generate high-quality depth maps, point clouds, and textured 3D meshes from ordinary 2D images using state-of-the-art deep learning.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
@@ -8,31 +12,27 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
-### AI-Powered Depth Estimation, 3D Mesh Generation & Interactive Visualization
-
-Generate professional-quality depth maps, point clouds, and textured meshes from ordinary images using modern deep learning—completely offline.
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 </div>
+
+---
+
+# Overview
+
+NeuraDepth is a modern AI-powered desktop web application that transforms ordinary RGB images into accurate depth maps, interactive point clouds, and textured 3D meshes.
+
+Powered by **PyTorch**, **MiDaS**, **FastAPI**, **React**, and **Three.js**, NeuraDepth performs all processing locally, providing high-performance depth estimation without relying on cloud services or external APIs.
+
+Designed for developers, researchers, artists, and students, the application combines professional AI inference with an intuitive interface and real-time visualization.
 
 ---
 
 # Preview
 
 <p align="center">
-<img src="docs/images/hero.png" width="100%">
+<img src="frontend/public/screenshot.png" width="100%" alt="NeuraDepth Preview">
 </p>
-
----
-
-# Overview
-
-NeuraDepth is a professional desktop web application that converts ordinary RGB images into accurate depth maps and interactive 3D reconstructions using deep learning.
-
-Built with a React frontend and a FastAPI backend powered by PyTorch, the application performs all inference locally without requiring cloud services or external APIs.
-
-The project is designed for developers, researchers, students, artists, and engineers who require fast, privacy-focused depth estimation and visualization.
 
 ---
 
@@ -40,70 +40,74 @@ The project is designed for developers, researchers, students, artists, and engi
 
 ## AI Depth Estimation
 
-- MiDaS-based monocular depth estimation
-- High-quality depth reconstruction
-- GPU acceleration via PyTorch
+- MiDaS deep learning model
+- High-quality monocular depth prediction
+- GPU acceleration using PyTorch
 - CPU fallback support
-- Local inference
+- Offline execution
+- High-resolution depth generation
 
 ---
 
-## Interactive 3D Viewer
+## Interactive 3D Visualization
 
-- Solid mesh rendering
-- Point cloud rendering
-- Wireframe rendering
+- Real-time mesh rendering
+- Interactive point cloud viewer
+- Wireframe visualization
 - Orbit controls
-- Zoom
-- Pan
-- Automatic centering
-- Real-time rendering
+- Zoom & pan
+- Automatic camera centering
+- High-performance Three.js rendering
 
 ---
 
 ## Compare Mode
 
-Compare the original image against the generated depth map using an interactive slider.
+Compare the original image with the generated depth map using an interactive comparison slider.
 
 <p align="center">
-<img src="docs/images/compare-mode.png" width="90%">
+<img src="frontend/public/compare-mode.png" width="90%">
 </p>
 
 ---
 
-## Professional Processing Modes
+## Professional Scan Modes
 
 | Mode | Description |
 |------|-------------|
-| Depth Map | AI-generated grayscale depth estimation |
-| LiDAR | Simulated LiDAR point cloud |
-| Mesh | Polygon mesh reconstruction |
-| Wireframe | Structural topology visualization |
-| Scanner | Futuristic scan visualization |
-| Photogrammetry | Reconstruction artifact simulation |
-| Topographic | Terrain contour generation |
+| **Depth Map** | AI-generated grayscale depth estimation |
+| **LiDAR** | Simulated LiDAR point cloud |
+| **Mesh** | Polygon mesh reconstruction |
+| **Wireframe** | Surface topology visualization |
+| **Photogrammetry** | Reconstruction artifact simulation |
+| **Scanner** | Futuristic scan visualization |
+| **Topographic** | Terrain contour visualization |
 
 ---
 
 ## Interactive Controls
 
+NeuraDepth includes adjustable processing parameters:
+
 - Scan Density
 - Point Density
-- Edge Sensitivity
 - Noise Amount
+- Edge Sensitivity
 - Depth Contrast
 - Smoothing
 - Mesh Refresh
-- Compare View
+- Compare Mode
 - 3D View Toggle
+
+Every parameter updates the generated visualization in real time.
 
 ---
 
 ## Professional Export Formats
 
-Export generated data for professional 3D software.
+Export generated data for use in professional 3D applications.
 
-Supported formats:
+Supported formats
 
 - 16-bit PNG
 - OBJ Mesh
@@ -114,7 +118,7 @@ Compatible with
 - Blender
 - Unreal Engine
 - Unity
-- Maya
+- Autodesk Maya
 - MeshLab
 
 ---
@@ -124,7 +128,7 @@ Compatible with
 ## Upload Workspace
 
 <p align="center">
-<img src="docs/images/upload-workspace.png" width="95%">
+<img src="frontend/public/upload-workspace.png" width="95%">
 </p>
 
 ---
@@ -132,7 +136,7 @@ Compatible with
 ## Compare Mode
 
 <p align="center">
-<img src="docs/images/compare-mode.png" width="95%">
+<img src="frontend/public/compare-mode.png" width="95%">
 </p>
 
 ---
@@ -140,7 +144,7 @@ Compatible with
 ## Interactive Mesh Viewer
 
 <p align="center">
-<img src="docs/images/mesh-view.png" width="95%">
+<img src="frontend/public/mesh-view.png" width="95%">
 </p>
 
 ---
@@ -148,7 +152,7 @@ Compatible with
 ## Depth Visualization
 
 <p align="center">
-<img src="docs/images/depth-view.png" width="95%">
+<img src="frontend/public/depth-view.png" width="95%">
 </p>
 
 ---
@@ -156,39 +160,39 @@ Compatible with
 # Architecture
 
 ```
-                User
+                  User
 
-                  │
+                    │
 
           React + TypeScript
 
-                  │
+                    │
 
         REST API + WebSockets
 
-                  │
+                    │
 
-              FastAPI
+               FastAPI
 
-                  │
+                    │
 
       OpenCV + NumPy + PyTorch
 
-                  │
+                    │
 
-            MiDaS AI Model
+              MiDaS Model
 
-                  │
+                    │
 
-        Depth Reconstruction
+      Depth Reconstruction Engine
 
-                  │
+                    │
 
-     Mesh / Point Cloud Engine
+   Mesh / Point Cloud Generation
 
-                  │
+                    │
 
-      Interactive Three.js Viewer
+       Three.js 3D Visualization
 ```
 
 ---
@@ -200,26 +204,32 @@ Compatible with
 - React 18
 - TypeScript
 - Vite
-- TailwindCSS
+- Tailwind CSS
+- Framer Motion
 - Three.js
 - React Three Fiber
 - React Drei
-- Framer Motion
 - Lucide React
+
+---
 
 ## Backend
 
-- FastAPI
 - Python
+- FastAPI
 - Uvicorn
 - PyTorch
 - OpenCV
 - NumPy
 - Pillow
 
+---
+
 ## AI
 
 - MiDaS
+
+---
 
 ## Communication
 
@@ -232,10 +242,25 @@ Compatible with
 
 ```text
 NeuraDepth/
+│
 ├── backend/
+│   ├── app/
+│   ├── services/
+│   ├── models/
+│   └── requirements.txt
+│
 ├── frontend/
-├── docs/
-│   └── images/
+│   ├── public/
+│   │   ├── screenshot.png
+│   │   ├── upload-workspace.png
+│   │   ├── compare-mode.png
+│   │   ├── mesh-view.png
+│   │   └── depth-view.png
+│   │
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+│
 ├── Dockerfile
 ├── docker-compose.yml
 ├── start.bat
@@ -247,7 +272,7 @@ NeuraDepth/
 
 # Installation
 
-## Clone
+## Clone Repository
 
 ```bash
 git clone https://github.com/forex-911/NeuraDepth.git
@@ -257,27 +282,41 @@ cd NeuraDepth
 
 ---
 
-## Backend
+## Backend Setup
 
 ```bash
 cd backend
 
 python -m venv .venv
+```
 
-# Windows
+### Windows
+
+```bash
 .venv\Scripts\activate
+```
 
-# Linux / macOS
+### Linux/macOS
+
+```bash
 source .venv/bin/activate
+```
 
+Install dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
+Run server
+
+```bash
 uvicorn app.main:app --reload
 ```
 
 ---
 
-## Frontend
+## Frontend Setup
 
 ```bash
 cd frontend
@@ -287,23 +326,33 @@ npm install
 npm run dev
 ```
 
+Open
+
+```
+http://localhost:5173
+```
+
 ---
 
 # Docker
 
-Pull
+## Pull Image
 
 ```bash
 docker pull forex911/neuradepth
 ```
 
-Run
+---
+
+## Run Container
 
 ```bash
 docker run -p 8000:8000 forex911/neuradepth
 ```
 
-Build locally
+---
+
+## Build Locally
 
 ```bash
 docker build -t neuradepth .
@@ -311,14 +360,70 @@ docker build -t neuradepth .
 
 ---
 
+# API
+
+### Upload Image
+
+```
+POST /api/upload
+```
+
+Returns
+
+```json
+{
+    "job_id":"..."
+}
+```
+
+---
+
+### Job Status
+
+```
+GET /api/jobs/{id}
+```
+
+---
+
+### WebSocket
+
+```
+ws://localhost:8000/ws
+```
+
+Streams
+
+- Progress updates
+- Processing status
+- Completion events
+- Error messages
+
+---
+
 # Performance
 
-| Hardware | Estimated Processing Time |
-|------------|--------------------------:|
-| RTX 3050 | 1–2 s |
-| RTX 3060 | <1 s |
-| GTX 1650 | 2–4 s |
-| CPU | 8–20 s |
+| Hardware | Processing Time |
+|------------|----------------:|
+| RTX 4090 | <1 second |
+| RTX 3060 | ~1 second |
+| RTX 3050 | ~1–2 seconds |
+| GTX 1650 | ~2–4 seconds |
+| CPU | ~8–20 seconds |
+
+---
+
+# Why NeuraDepth?
+
+- Fully Offline Processing
+- No Cloud Dependencies
+- GPU Accelerated
+- Interactive 3D Rendering
+- Modern React Interface
+- Production-Ready FastAPI Backend
+- Docker Ready
+- Open Source
+- Cross Platform
 
 ---
 
@@ -332,23 +437,11 @@ docker build -t neuradepth .
 - [x] PLY Export
 - [x] Docker Support
 - [ ] ONNX Runtime
-- [ ] TensorRT Acceleration
+- [ ] TensorRT Optimization
 - [ ] Video Depth Estimation
 - [ ] Batch Processing
-- [ ] Multi-image Reconstruction
-
----
-
-# Why NeuraDepth?
-
-- Fully offline execution
-- No cloud dependency
-- GPU accelerated
-- Interactive 3D visualization
-- Modern React interface
-- Production-ready FastAPI backend
-- Docker support
-- Open-source architecture
+- [ ] Multi-GPU Support
+- [ ] Cloud Deployment Templates
 
 ---
 
@@ -357,16 +450,32 @@ docker build -t neuradepth .
 Contributions are welcome.
 
 1. Fork the repository.
+
 2. Create a feature branch.
+
+```bash
+git checkout -b feature/my-feature
+```
+
 3. Commit your changes.
+
+```bash
+git commit -m "Add new feature"
+```
+
 4. Push the branch.
+
+```bash
+git push origin feature/my-feature
+```
+
 5. Open a Pull Request.
 
 ---
 
 # License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -374,10 +483,18 @@ This project is licensed under the MIT License.
 
 **Forex911**
 
+AI & Full Stack Developer
+
 GitHub: https://github.com/forex911
 
 Docker Hub: https://hub.docker.com/r/forex911/neuradepth
 
 ---
 
-If you find NeuraDepth useful, consider giving the repository a ⭐ to support future development.
+<div align="center">
+
+### ⭐ If you find NeuraDepth useful, please consider starring the repository.
+
+Built with ❤️ using React, FastAPI, PyTorch, and Three.js.
+
+</div>
