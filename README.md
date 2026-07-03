@@ -21,8 +21,7 @@ Generate high-quality depth maps, point clouds, and textured 3D meshes from ordi
 # Overview
 
 NeuraDepth is a modern AI-powered desktop web application that transforms ordinary RGB images into accurate depth maps, interactive point clouds, and textured 3D meshes.
-
-Powered by **PyTorch**, **MiDaS**, **FastAPI**, **React**, and **Three.js**, NeuraDepth performs all processing locally, providing high-performance depth estimation without relying on cloud services or external APIs.
+Powered by **PyTorch**, **Depth Anything V2**, **FastAPI**, **React**, and **Three.js**, NeuraDepth performs all processing locally, providing high-performance depth estimation without relying on cloud services or external APIs.
 
 Designed for developers, researchers, artists, and students, the application combines professional AI inference with an intuitive interface and real-time visualization.
 
@@ -39,8 +38,7 @@ Designed for developers, researchers, artists, and students, the application com
 # Features
 
 ## AI Depth Estimation
-
-- MiDaS deep learning model
+- Depth Anything V2 deep learning model
 - High-quality monocular depth prediction
 - GPU acceleration using PyTorch
 - CPU fallback support
@@ -179,8 +177,7 @@ Compatible with
       OpenCV + NumPy + PyTorch
 
                     │
-
-              MiDaS Model
+              Depth Anything V2
 
                     │
 
@@ -226,8 +223,7 @@ Compatible with
 ---
 
 ## AI
-
-- MiDaS
+- Depth Anything V2
 
 ---
 
@@ -361,35 +357,19 @@ docker build -t neuradepth .
 ---
 
 # API
-
-### Upload Image
-
-```
-POST /api/upload
-```
-
-Returns
-
-```json
-{
-    "job_id":"..."
-}
-```
-
----
-
-### Job Status
+### Generate Depth Scan
 
 ```
-GET /api/jobs/{id}
+POST /scan
 ```
+
+Accepts image and processing parameters as form data. Returns the generated file bytes directly.
 
 ---
 
 ### WebSocket
 
-```
-ws://localhost:8000/ws
+```ws://localhost:8000/ws/progress
 ```
 
 Streams
@@ -496,5 +476,4 @@ Docker Hub: https://hub.docker.com/r/forex911/neuradepth
 ### ⭐ If you find NeuraDepth useful, please consider starring the repository.
 
 Built with ❤️ using React, FastAPI, PyTorch, and Three.js.
-
 </div>
