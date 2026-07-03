@@ -2,42 +2,37 @@
 
 <div align="center">
 
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.10+-green.svg)
-![React](https://img.shields.io/badge/React-18-61DAFB.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-DeepLearning-EE4C2C.svg)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=threedotjs&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-### AI-powered depth estimation, 3D reconstruction and visualization platform.
+### AI-Powered Depth Estimation, 3D Mesh Generation & Interactive Visualization
 
-Generate accurate depth maps, point clouds and textured meshes from ordinary images using state-of-the-art deep learning.
+Generate professional-quality depth maps, point clouds, and textured meshes from ordinary images using modern deep learning—completely offline.
 
 </div>
-
----
-
-# Overview
-
-NeuraDepth is a modern AI-powered desktop web application designed for converting ordinary RGB images into high-quality depth maps, interactive point clouds, and textured 3D meshes.
-
-The application integrates modern deep learning models with GPU acceleration, an interactive React interface, and real-time FastAPI services to deliver professional-grade depth estimation completely offline.
-
-Unlike cloud-based services, every computation is performed locally, ensuring:
-
-- Privacy
-- Zero API costs
-- Offline usage
-- Full GPU utilization
-- High performance
 
 ---
 
 # Preview
 
 <p align="center">
-<img src="frontend/public/screenshot.png" width="100%">
+<img src="docs/images/hero.png" width="100%">
 </p>
+
+---
+
+# Overview
+
+NeuraDepth is a professional desktop web application that converts ordinary RGB images into accurate depth maps and interactive 3D reconstructions using deep learning.
+
+Built with a React frontend and a FastAPI backend powered by PyTorch, the application performs all inference locally without requiring cloud services or external APIs.
+
+The project is designed for developers, researchers, students, artists, and engineers who require fast, privacy-focused depth estimation and visualization.
 
 ---
 
@@ -45,49 +40,74 @@ Unlike cloud-based services, every computation is performed locally, ensuring:
 
 ## AI Depth Estimation
 
-• MiDaS deep learning models
-
-• Monocular depth prediction
-
-• High precision depth reconstruction
-
-• GPU acceleration
-
-• CPU fallback
+- MiDaS-based monocular depth estimation
+- High-quality depth reconstruction
+- GPU acceleration via PyTorch
+- CPU fallback support
+- Local inference
 
 ---
 
-## Interactive 3D Visualization
+## Interactive 3D Viewer
 
-- Three.js Rendering
-- Point Cloud Viewer
-- Mesh Viewer
-- Orbit Controls
+- Solid mesh rendering
+- Point cloud rendering
+- Wireframe rendering
+- Orbit controls
 - Zoom
-- Rotation
-- Wireframe Rendering
+- Pan
+- Automatic centering
+- Real-time rendering
 
 ---
 
-## Processing Modes
+## Compare Mode
+
+Compare the original image against the generated depth map using an interactive slider.
+
+<p align="center">
+<img src="docs/images/compare-mode.png" width="90%">
+</p>
+
+---
+
+## Professional Processing Modes
 
 | Mode | Description |
 |------|-------------|
-| Depth | AI generated grayscale depth |
-| LiDAR | Simulated LiDAR scan |
-| Mesh | Polygon mesh generation |
-| Wireframe | Surface topology |
+| Depth Map | AI-generated grayscale depth estimation |
+| LiDAR | Simulated LiDAR point cloud |
+| Mesh | Polygon mesh reconstruction |
+| Wireframe | Structural topology visualization |
 | Scanner | Futuristic scan visualization |
-| Photogrammetry | Reconstruction artifacts |
-| Topographic | Terrain contours |
+| Photogrammetry | Reconstruction artifact simulation |
+| Topographic | Terrain contour generation |
 
 ---
 
-## Export Formats
+## Interactive Controls
 
-- PNG (16-bit)
-- OBJ
-- PLY
+- Scan Density
+- Point Density
+- Edge Sensitivity
+- Noise Amount
+- Depth Contrast
+- Smoothing
+- Mesh Refresh
+- Compare View
+- 3D View Toggle
+
+---
+
+## Professional Export Formats
+
+Export generated data for professional 3D software.
+
+Supported formats:
+
+- 16-bit PNG
+- OBJ Mesh
+- PLY Point Cloud
 
 Compatible with
 
@@ -99,42 +119,76 @@ Compatible with
 
 ---
 
+# Screenshots
+
+## Upload Workspace
+
+<p align="center">
+<img src="docs/images/upload-workspace.png" width="95%">
+</p>
+
+---
+
+## Compare Mode
+
+<p align="center">
+<img src="docs/images/compare-mode.png" width="95%">
+</p>
+
+---
+
+## Interactive Mesh Viewer
+
+<p align="center">
+<img src="docs/images/mesh-view.png" width="95%">
+</p>
+
+---
+
+## Depth Visualization
+
+<p align="center">
+<img src="docs/images/depth-view.png" width="95%">
+</p>
+
+---
+
 # Architecture
 
 ```
-                   User
+                User
 
-                    │
+                  │
 
           React + TypeScript
 
-                    │
+                  │
 
-      REST API + WebSockets
+        REST API + WebSockets
 
-                    │
+                  │
 
-               FastAPI
+              FastAPI
 
-                    │
+                  │
 
-      PyTorch + OpenCV + NumPy
+      OpenCV + NumPy + PyTorch
 
-                    │
+                  │
 
-             MiDaS Model
+            MiDaS AI Model
 
-                    │
+                  │
 
-      Depth Generation Engine
+        Depth Reconstruction
 
-                    │
+                  │
 
-    Mesh / Point Cloud Generator
+     Mesh / Point Cloud Engine
 
-                    │
+                  │
 
-       3D Visualization Engine
+      Interactive Three.js Viewer
 ```
 
 ---
@@ -147,13 +201,11 @@ Compatible with
 - TypeScript
 - Vite
 - TailwindCSS
-- Framer Motion
 - Three.js
 - React Three Fiber
 - React Drei
-- Lucide Icons
-
----
+- Framer Motion
+- Lucide React
 
 ## Backend
 
@@ -165,13 +217,9 @@ Compatible with
 - NumPy
 - Pillow
 
----
-
-## AI Models
+## AI
 
 - MiDaS
-
----
 
 ## Communication
 
@@ -182,25 +230,15 @@ Compatible with
 
 # Project Structure
 
-```
-NeuraDepth
-│
-├── backend
-│   ├── app
-│   ├── services
-│   ├── models
-│   ├── processor.py
-│   └── main.py
-│
-├── frontend
-│   ├── src
-│   ├── assets
-│   ├── components
-│   ├── styles
-│   └── App.tsx
-│
+```text
+NeuraDepth/
+├── backend/
+├── frontend/
+├── docs/
+│   └── images/
 ├── Dockerfile
 ├── docker-compose.yml
+├── start.bat
 ├── README.md
 └── LICENSE
 ```
@@ -226,6 +264,10 @@ cd backend
 
 python -m venv .venv
 
+# Windows
+.venv\Scripts\activate
+
+# Linux / macOS
 source .venv/bin/activate
 
 pip install -r requirements.txt
@@ -249,23 +291,19 @@ npm run dev
 
 # Docker
 
-## Pull
+Pull
 
 ```bash
 docker pull forex911/neuradepth
 ```
 
----
-
-## Run
+Run
 
 ```bash
 docker run -p 8000:8000 forex911/neuradepth
 ```
 
----
-
-## Build
+Build locally
 
 ```bash
 docker build -t neuradepth .
@@ -273,116 +311,44 @@ docker build -t neuradepth .
 
 ---
 
-# API
-
-## Upload Image
-
-```
-POST /api/upload
-```
-
-Returns
-
-```json
-{
-  "job_id":"..."
-}
-```
-
----
-
-## Job Status
-
-```
-GET /api/jobs/{id}
-```
-
----
-
-## WebSocket
-
-```
-ws://localhost:8000/ws
-```
-
-Provides
-
-- Progress
-- Completion
-- Errors
-- Notifications
-
----
-
 # Performance
 
-| Hardware | Processing Time |
-|------------|----------------|
-| RTX 3050 | ~1-2 seconds |
-| GTX 1650 | ~2-4 seconds |
-| CPU | ~8-20 seconds |
-
----
-
-# Screenshots
-
-## Upload
-
-<img src="docs/upload.png">
-
----
-
-## Depth Map
-
-<img src="docs/depth.png">
-
----
-
-## Mesh
-
-<img src="docs/mesh.png">
-
----
-
-## Point Cloud
-
-<img src="docs/pointcloud.png">
+| Hardware | Estimated Processing Time |
+|------------|--------------------------:|
+| RTX 3050 | 1–2 s |
+| RTX 3060 | <1 s |
+| GTX 1650 | 2–4 s |
+| CPU | 8–20 s |
 
 ---
 
 # Roadmap
 
-- [x] MiDaS Integration
-- [x] Point Cloud
-- [x] OBJ Export
+- [x] AI Depth Estimation
+- [x] Interactive 3D Viewer
+- [x] Compare Mode
 - [x] Mesh Generation
-- [x] LiDAR Mode
+- [x] OBJ Export
+- [x] PLY Export
 - [x] Docker Support
 - [ ] ONNX Runtime
 - [ ] TensorRT Acceleration
 - [ ] Video Depth Estimation
 - [ ] Batch Processing
-- [ ] Multi-GPU Support
+- [ ] Multi-image Reconstruction
 
 ---
 
 # Why NeuraDepth?
 
-✅ Runs Completely Offline
-
-✅ GPU Accelerated
-
-✅ No Cloud Dependencies
-
-✅ Open Source
-
-✅ Cross Platform
-
-✅ Docker Ready
-
-✅ Modern React Interface
-
-✅ Interactive 3D Rendering
+- Fully offline execution
+- No cloud dependency
+- GPU accelerated
+- Interactive 3D visualization
+- Modern React interface
+- Production-ready FastAPI backend
+- Docker support
+- Open-source architecture
 
 ---
 
@@ -390,27 +356,11 @@ Provides
 
 Contributions are welcome.
 
-1. Fork the repository
-
-2. Create a feature branch
-
-```bash
-git checkout -b feature/my-feature
-```
-
-3. Commit
-
-```bash
-git commit -m "Add feature"
-```
-
-4. Push
-
-```bash
-git push origin feature/my-feature
-```
-
-5. Open a Pull Request
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Push the branch.
+5. Open a Pull Request.
 
 ---
 
@@ -424,16 +374,10 @@ This project is licensed under the MIT License.
 
 **Forex911**
 
-AI & Full Stack Developer
+GitHub: https://github.com/forex911
 
-GitHub
-
-https://github.com/forex-911
-
-Docker Hub
-
-https://hub.docker.com/r/forex911/neuradepth
+Docker Hub: https://hub.docker.com/r/forex911/neuradepth
 
 ---
 
-If NeuraDepth helped your work, consider giving the repository a ⭐.
+If you find NeuraDepth useful, consider giving the repository a ⭐ to support future development.
