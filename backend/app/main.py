@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import os
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from fastapi.staticfiles import StaticFiles
 
 from .processor import ProcessingParams, process_image
 
@@ -93,3 +95,7 @@ async def scan(
         media_type=media_type,
         headers={"X-File-Extension": ext}
     )
+
+# Mount the React frontend static files
+if os.path.exists("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")

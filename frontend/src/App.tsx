@@ -13,7 +13,7 @@ type ControlKey =
   | "smoothing"
   | "pointDensity";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
 
 const modes: Array<{ id: ScanMode; label: string }> = [
   { id: "depth", label: "Depth Map" },
@@ -49,7 +49,10 @@ function App() {
 
   // Initialize WebSocket connection for live progress
   useEffect(() => {
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/progress");
+    const wsUrl = import.meta.env.DEV 
+      ? "ws://127.0.0.1:8000/ws/progress" 
+      : `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/progress`;
+    const ws = new WebSocket(wsUrl);
     ws.onmessage = (event) => {
       setProgressMsg(event.data);
       if (event.data.includes("successfully")) {
