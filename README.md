@@ -157,7 +157,7 @@ Compatible with
 
 ## Architecture Diagram
 
-![Architecture Diagram](.gitlapse/architecture.svg)
+<img src=".gitlapse/architecture.svg" width="100%" alt="Architecture Diagram">
 
 <details>
 <summary>Mermaid Source</summary>
@@ -190,7 +190,6 @@ flowchart TD
     frontendApp -->|renders| threeDViewer
 ```
 </details>
-
 # Technology Stack
 
 ## Frontend
