@@ -155,44 +155,41 @@ Compatible with
 
 ---
 
-# Architecture
+## Architecture Diagram
 
+![Architecture Diagram](.gitlapse/architecture.svg)
+
+<details>
+<summary>Mermaid Source</summary>
+
+```mermaid
+flowchart TD
+    subgraph Frontend["Frontend Application"]
+        frontendApp["React UI"]
+        threeDViewer["3D Viewer"]
+    end
+
+    subgraph Backend["Backend API"]
+        backendApp["FastAPI Server"]
+        apiRouter["API Router"]
+        processor["Processor Orchestrator"]
+        depthEngine["Depth Engine"]
+        modelManager["Model Manager"]
+        exportService["Export Service"]
+    end
+
+    frontendApp -->|HTTP POST /process| apiRouter
+    backendApp -->|mounts| apiRouter
+    apiRouter -->|calls| processor
+    processor -->|invokes| depthEngine
+    processor -->|invokes| exportService
+    depthEngine -->|uses| modelManager
+    exportService -->|returns assets| processor
+    processor -->|JSON response| apiRouter
+    apiRouter -->|HTTP response| frontendApp
+    frontendApp -->|renders| threeDViewer
 ```
-                  User
-
-                    │
-
-          React + TypeScript
-
-                    │
-
-        REST API + WebSockets
-
-                    │
-
-               FastAPI
-
-                    │
-
-      OpenCV + NumPy + PyTorch
-
-                    │
-              Depth Anything V2
-
-                    │
-
-      Depth Reconstruction Engine
-
-                    │
-
-   Mesh / Point Cloud Generation
-
-                    │
-
-       Three.js 3D Visualization
-```
-
----
+</details>
 
 # Technology Stack
 
@@ -478,38 +475,4 @@ Docker Hub: https://hub.docker.com/r/forex911/neuradepth
 Built with ❤️ using React, FastAPI, PyTorch, and Three.js.
 </div>
 
-## Architecture Diagram
 
-![Architecture Diagram](.gitlapse/architecture.svg)
-
-<details>
-<summary>Mermaid Source</summary>
-
-```mermaid
-flowchart TD
-    subgraph Frontend["Frontend Application"]
-        frontendApp["React UI"]
-        threeDViewer["3D Viewer"]
-    end
-
-    subgraph Backend["Backend API"]
-        backendApp["FastAPI Server"]
-        apiRouter["API Router"]
-        processor["Processor Orchestrator"]
-        depthEngine["Depth Engine"]
-        modelManager["Model Manager"]
-        exportService["Export Service"]
-    end
-
-    frontendApp -->|HTTP POST /process| apiRouter
-    backendApp -->|mounts| apiRouter
-    apiRouter -->|calls| processor
-    processor -->|invokes| depthEngine
-    processor -->|invokes| exportService
-    depthEngine -->|uses| modelManager
-    exportService -->|returns assets| processor
-    processor -->|JSON response| apiRouter
-    apiRouter -->|HTTP response| frontendApp
-    frontendApp -->|renders| threeDViewer
-```
-</details>
